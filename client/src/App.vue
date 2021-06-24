@@ -1,48 +1,70 @@
 <template>
-    <div id="app">
-        <!-- <div id="navbar">
-            <Navbar />
-        </div> -->
-        <div id="game">
-            <Game />
-        </div>
-        <div id="border" />
-        <div id="input">
-            <Chat />
-        </div>
+<div id="app">
+
+<div class="columns" style="margin-bottom: 0px; display: contents;">
+  <div class="column is-two-thirds" style="padding-top: 0px; padding-bottom: 0px;">
+    <div class="Board">
+      <Board />
     </div>
+    <div class="player">
+      <Player />
+    </div>
+  </div>
+
+  <div id="border" />
+
+  <div class="column is-one-third">
+    <div id="chat">
+      <Chat />
+    </div>
+  </div>
+</div>
+
+</div>
 </template>
 
 <script>
-    // import Navbar from './components/Navbar.vue';
+    import Board from './components/Board.vue';
+    import Player from './components/Player.vue';
     import Chat from './components/Chat.vue';
-    // import Game from './components/Game.vue';
 
     export default {
         name: 'App',
         components: {
-            // Navbar,
-            Chat,
-            // Game
+            Board,
+            Player,
+            Chat
         }
     }
 </script>
 
 <style>
     #app {
+        width: 100%;
         font-family: 'Trebuchet MS';
         text-align: left;
         background-color: black;
         color: cyan;
         display: flex;
+        position: fixed;
     }
-    #game {
-        width: 50vw;
-        height: 100vh;
+    .Board {
+        height: 50vh;
+        word-break: break-word;
+
+        border: 1px solid red;
     }
-    #input {
-        width: 50vw;
+    .player {
+        height: 50vh;
+        word-break: break-word;
+
+        border: 1px solid blue;
+    }
+    #chat {
+        /* width: 25vw; */
         height: 100vh;
+        overflow-y: auto;
+        word-break: break-word;
     }
     #border {
         border-right: 2px solid cyan;
@@ -51,12 +73,12 @@
         #app {
             flex-direction: column;
         }
-        #game {
-            width: 100vw;
+        #Board {
+            /* width: 100vw; */
             height: 50vh;
         }
         #input {
-            width: 100vw;
+            /* width: 100vw; */
             height: 50vh;
         }
     }

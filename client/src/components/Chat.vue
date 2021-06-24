@@ -1,7 +1,7 @@
 <template>
     <div id="container">
         <div id="output">
-            <h1>STRUCT</h1>
+            <h1>Messages</h1>
             <p v-for="(text, index) in textOutput" :key="index">{{text}}</p>
         </div>
         <div id="input">
@@ -21,6 +21,7 @@
         name: 'Chat',
         data: function () {
             return {
+                username: "Player",
                 textInput: null,
                 textOutput: []
             }
@@ -28,7 +29,7 @@
         methods: {
             submitText: function (event) {
                 event.preventDefault();
-                socket.emit('send', this.textInput);
+                socket.emit('send', this.username, this.textInput);
             }
         },
         created: function () {
@@ -53,6 +54,8 @@
     }
     h1 {
         text-align: center;
+        width: 100%;
+        
     }
     .hotpink {
         color: hotpink;
@@ -63,7 +66,8 @@
     }
     input[type=text] {
         height: 20px;
-        width:  40vw;
+        width:  25vw;
+        padding: 11px;
         border: 2px solid cyan;
         background-color: black;
         color: hotpink;
@@ -74,8 +78,7 @@
         width: 5vw;
         background-color: black;
         color: cyan;
-        border: 2px solid cyan;
-        margin-right: 2vw;
+        border: 1px solid cyan;
     }
     input[type=submit]:focus{
         outline: none;
@@ -93,7 +96,7 @@
             margin-top: 43vh;
         }
         #output {
-            margin-right: 10vw;
+            /* margin-right: 10vw; */
         }
         input[type=text] {
             width: 60vw;

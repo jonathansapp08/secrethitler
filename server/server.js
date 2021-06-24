@@ -9,8 +9,8 @@ const io = require('socket.io')(http, {
 io.on('connection', function (socket) {
     console.log('A user connected: ' + socket.id);
     
-    socket.on('send', function (text) {
-        let newText = "<" + socket.id + "> " + text;
+    socket.on('send', function (username, text) {
+        let newText = username + ": " + text;
         io.emit('receive', newText);
     });
 

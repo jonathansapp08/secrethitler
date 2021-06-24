@@ -1,2 +1,2 @@
 # secrethitler
-Online version of the popular board game, Secret Hitler.
+Online version of the popular board Board, Secret Hitler.
