@@ -1,6 +1,4 @@
 <template>
-<div>
-
 <div class="columns ml-3 mr-3 mt-3">
   <div class="column">
     First column
@@ -35,8 +33,6 @@
     <div class="column">
     Fourth column
   </div>
-</div>
-
 </div>
 </template>
 
