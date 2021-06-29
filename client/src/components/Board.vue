@@ -1,15 +1,52 @@
 <template>
-    Board
+<div>
 
-    <div class="buttons">
-  <button class="button is-primary">Primary</button>
-  <button class="button is-link">Link</button>
+<div class="columns ml-3 mr-3 mt-3">
+  <div class="column">
+    First column
+  </div>
+  <div class="column">
+    Second column
+  </div>
+  <div class="column">
+    Third column
+  </div>
+  <div class="column">
+    Fourth column
+  </div>
+    <div class="column">
+    Fourth column
+  </div>
 </div>
 
-<div class="buttons">
-  <button class="button is-info">Info</button>
-  <button class="button is-success">Success</button>
-  <button class="button is-warning">Warning</button>
-  <button class="button is-danger">Danger</button>
+<div class="columns m-3">
+  <div class="column">
+    First column
+  </div>
+  <div class="column">
+    Second column
+  </div>
+  <div class="column">
+    Third column
+  </div>
+  <div class="column">
+    Fourth column
+  </div>
+    <div class="column">
+    Fourth column
+  </div>
+</div>
+
 </div>
 </template>
+
+
+<style scoped>
+.columns{
+  height: 45%;
+}
+
+.column{
+  border: 3px solid black;
+}
+</style>
