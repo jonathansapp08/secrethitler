@@ -29,17 +29,20 @@
         methods: {
             submitText: function (event) {
                 event.preventDefault();
-                socket.emit('send', this.username, this.textInput);
+                if (this.textInput != null){
+                    socket.emit('send_message', this.username, this.textInput);
+                }
             }
         },
         created: function () {
-            socket.on('connect', () => {
-                console.log('Connected!');
-            });
+            socket.emit('join', {username: this.username});
             socket.on('receive', (text) => {
                 this.textOutput.push(text);
                 this.textInput = null;
             });
+        },
+        beforePageDestroyed: function () {
+            socket.emit('leave', {username: this.username});
         }
     }
 </script>
