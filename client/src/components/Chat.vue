@@ -19,9 +19,9 @@
 
     export default {
         name: 'Chat',
-        data: function () {
+        props: ['username'],
+        data() {
             return {
-                username: "Player",
                 textInput: null,
                 textOutput: []
             }
@@ -35,14 +35,10 @@
             }
         },
         created: function () {
-            socket.emit('join', {username: this.username});
             socket.on('receive', (text) => {
                 this.textOutput.push(text);
                 this.textInput = null;
             });
-        },
-        beforePageDestroyed: function () {
-            socket.emit('leave', {username: this.username});
         }
     }
 </script>

@@ -1,31 +1,50 @@
 const server = require('express')();
 const http = require('http').createServer(server);
+const randomstring = require('randomstring');
 const io = require('socket.io')(http, {
     cors: {
         origin: "*",
     }
 });
 
-players = []
+const rooms = {};
 
 io.on('connection', function (socket) {
-    console.log('A user connected: ' + socket.id);
+    console.log('Connection established');
 
-    socket.on('join', function (data) {
-        console.log('A user connected: ' + socket.id);
+    socket.on("createGame", function (data) {
+        const roomID=randomstring.generate({length: 4});
+        socket.join(roomID);
+
+        rooms[roomID]={[data.username]: socket.id};
+
+        socket.broadcast.emit('receive', "Other players can join with: " + roomID);
         socket.broadcast.emit('receive', data.username + ' joined!');
-        players.push({"socket_id":socket.id,"username":data.username})
+        console.log(data.username + ' connected')
     });
 
-    socket.on('disconnect', function (data) {
+    socket.on("joinGame", function (data) {
+        socket.join(data.roomID);
+        roomID = data.roomID;
+        username = data.username;
+
+        rooms[roomID][username] = socket.id;
+
+        socket.broadcast.emit('receive', data.username + ' joined!');
+        console.log(data.username + ' connected')
+    });
+
+    socket.on('leaveGame', function (data) {
         console.log('A user disconnected: ' + socket.id);
 
-        for (var i = 0; i < players.length; i++){
-            if (players[i].socket_id == socket.id){
-                socket.broadcast.emit('receive', players[i].username + ' disconnected!');
-                players.splice(i, 1);
+        roomID = data.roomID;
+
+        for (let value in rooms[roomID]){
+            if (rooms[roomID][value] == socket.id){
+                socket.broadcast.emit('receive', value + ' disconnected!');
+                // TODO REMOVE USERNAME AND SOCKET FROM ROOM OBJECT
             }
-          }
+        }
     });
 
     socket.on('send_message', function (username, text) {

@@ -1,7 +1,7 @@
 <template>
 <div class="columns">
 
-<div v-for="index in 5" :key="index" class="column">
+<div v-for="index in 10" :key="index" class="column">
 <div class="card" style="text-align: center;">
   <div class="card-content">
     <div class="media">

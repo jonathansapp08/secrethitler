@@ -1,5 +1,5 @@
 <template>
-<div class="columns ml-3 mr-3 mt-3">
+<!-- <div class="columns ml-3 mr-3 mt-3">
   <div class="column">
     First column
   </div>
@@ -15,9 +15,9 @@
     <div class="column">
     Fourth column
   </div>
-</div>
+</div> -->
 
-<div class="columns m-3">
+<!-- <div class="columns m-3">
   <div class="column">
     First column
   </div>
@@ -33,7 +33,19 @@
     <div class="column">
     Fourth column
   </div>
-</div>
+</div> -->
+
+
+
+<img src="../assets/liberalboard.png" alt="Girl in a jacket" width="470" height="600">
+<img src="../assets/fascistboard78.png" alt="Girl in a jacket" width="470" height="600">
+
+<img src="../assets/policy.png" alt="Girl in a jacket" width="75" height="600">
+
+
+
+
+
 </template>
 
 
