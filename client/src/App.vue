@@ -7,7 +7,8 @@
         <h4>Create a New Game</h4>
         <form onsubmit="return false">                        
             <input v-model="username" type="text" placeholder="Enter Username">
-            <button @click="createGame(username)">Create</button>
+            <input v-model="playerNum" type="number" placeholder="Enter number of players">
+            <button @click="createGame(username, numPlayers)">Create</button>
         </form>
     </div>
     
@@ -36,7 +37,7 @@
 
     <div class="columns">
     <div class="column">
-        <Player/>
+        <Player />
     </div>
     </div>
 </div>
@@ -64,7 +65,8 @@ export default {
             lobby: true,
             game: false,
             username: null,
-            roomID: null
+            playerNum: null,
+            roomID: null,
         }
     },
     created () {  
@@ -75,17 +77,17 @@ export default {
         window.addEventListener('beforeunload', this.leaveGames);
     },
     methods: {
-        createGame (username) {
+        createGame (username, playerNum) {
             if (username != null){
-                socket.emit('createGame',{username:username});
+                socket.emit('createGame',{username:username, playerNum:playerNum});
                 this.lobby = false
                 this.game = true
                 this.username = username
             }
         },
-        joinGame (username, roomID) {
+        joinGame (username, roomID, playerNum) {
             if (username != null && roomID != null){
-                socket.emit('joinGame',{username:username, roomID:roomID});
+                socket.emit('joinGame',{username:username, roomID:roomID, playerNum:playerNum});
                 this.lobby = false
                 this.game = true
                 this.username = username
