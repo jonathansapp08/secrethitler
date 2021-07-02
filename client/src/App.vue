@@ -67,52 +67,32 @@ export default {
             roomID: null
         }
     },
-    created () {    
-        window.addEventListener('beforeunload', this.leaveGame)  
+    created () {  
+        socket.on('newGame', (roomID) => {
+            this.roomID = roomID;
+        });
+         
+        window.addEventListener('beforeunload', this.leaveGames);
     },
     methods: {
         createGame (username) {
             if (username != null){
-                socket.emit("createGame",{username:username});
+                socket.emit('createGame',{username:username});
                 this.lobby = false
                 this.game = true
                 this.username = username
             }
         },
         joinGame (username, roomID) {
-            socket.emit("joinGame",{username:username, roomID:roomID});
-            this.lobby = false
-            this.game = true
-            this.username = username
-            this.roomID = roomID
-        },
-        leaveGame () {
-            console.log("QUITTING")
-            console.log("bye " + this.username)
-            console.log(this.roomID)
-
-            if (typeof this.roomID === 'string') {
-                console.log('beginning call')
-                socket.emit("leaveGame",{username:this.username, roomID:this.roomID});
-                console.log('ending call')
+            if (username != null && roomID != null){
+                socket.emit('joinGame',{username:username, roomID:roomID});
+                this.lobby = false
+                this.game = true
+                this.username = username
+                this.roomID = roomID
             }
-
-            // TODO DISCONNECT AND TELL EVERYONE THAT USER DISCONNECTED
-
-            // this.username = username
-            // this.roomID = roomID
-            
         }
-    },
-    beforePageDestroyed: function (username, roomID) {
-        socket.disconnect({username:username, roomID:roomID});
-    },
-
-    // mounted: function (data) {
-    //     alert(data.username)
-    //     alert(data.roomID)
-    // }
-
+    }
 }
 </script>
 
