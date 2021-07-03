@@ -1,14 +1,14 @@
 <template>
 <div class="columns">
 
-<div v-for="index in players" :key="index" class="column">
+<div v-for="(name, value, index) in players" :key="index" class="column">
 <div class="card" style="text-align: center;">
   <div class="card-content">
     <div class="media">
       <div class="media-content">
         
-        <!-- TODO DISPLAY ONLY USERNAMES -->
-        <p class="title is-4">{{players}}</p>
+        <!-- TODO DISPLAY ONLY USERNAMES  -->
+        <p class="title is-4">{{value}}</p>
       </div>
     </div>
   </div>
@@ -38,7 +38,6 @@ export default {
     },
     created () {  
         socket.on('listPlayer', (players) => {
-          console.log(players);
           this.players = players; 
         });
          
