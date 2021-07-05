@@ -34,20 +34,46 @@
     Fourth column
   </div>
 </div> -->
+<div>
+  <div v-show="waiting" class="waiting">
+    {{message}}
+    <button @click="startGame()">Start Game</button>
+  </div>
 
+  <div v-show="board" class="board">
+    <img src="../assets/liberalboard.png" alt="Girl in a jacket" width="470" height="600">
+    <img src="../assets/fascistboard78.png" alt="Girl in a jacket" width="470" height="600">
 
+    <img src="../assets/policy.png" alt="Girl in a jacket" width="75" height="600">
+  </div>
 
-<img src="../assets/liberalboard.png" alt="Girl in a jacket" width="470" height="600">
-<img src="../assets/fascistboard78.png" alt="Girl in a jacket" width="470" height="600">
-
-<img src="../assets/policy.png" alt="Girl in a jacket" width="75" height="600">
-
-
-
-
+</div>
 
 </template>
+<script>
 
+export default {
+    name: 'Board',
+    components: {
+    },
+    data() {
+        return{
+            waiting: true,
+            board: false,
+            message: "Waiting for more players..."
+
+        }
+    },
+    created () {  
+
+    },
+    methods: {
+      startGame(){
+        console.log('hi');
+      }
+    }
+}
+</script>
 
 <style scoped>
 .columns{

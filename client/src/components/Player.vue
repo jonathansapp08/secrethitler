@@ -2,20 +2,19 @@
 <div class="columns">
 
 <div v-for="(name, value, index) in players" :key="index" class="column">
-<div class="card" style="text-align: center;">
+<div @click="sayHi()" class="card" style="text-align: center;">
   <div class="card-content">
     <div class="media">
       <div class="media-content">
         
-        <!-- TODO DISPLAY ONLY USERNAMES  -->
         <p class="title is-4">{{value}}</p>
       </div>
     </div>
   </div>
   <div class="card-image">
-    <!-- <figure class="image is-4by3">
-      <img src="https://bulma.io/images/placeholders/1280x960.png" alt="Placeholder image">
-    </figure> -->
+    <figure class="image is-128x128">
+      <img src="https://bulma.io/images/placeholders/128x128.png" alt="Placeholder image">
+    </figure>
   </div>
 </div>
 </div>
@@ -43,7 +42,9 @@ export default {
          
     },
     methods: {
-       
+       sayHi(){
+         console.log("hiiiiiiii")
+       }
     }
 }
 </script>

@@ -28,7 +28,7 @@
 <div v-show="game" class="game">
     <div class="columns top-half" style="margin-top: 0px;">
     <div class="column is-two-thirds">
-        <Board />
+        <Board :message="message"/>
     </div>
     <div id="chat" class="column">
         <Chat :username="username" />
@@ -65,7 +65,6 @@ export default {
             lobby: true,
             game: false,
             username: null,
-            // playerNum: null,
             roomID: null,
         }
     },

@@ -22,6 +22,8 @@ io.on('connection', function (socket) {
         socket.broadcast.emit('receive', data.username + ' joined!');
         socket.emit('newGame', roomID);
         console.log(data.username + ' created room ' + roomID);
+
+        socket.broadcast.emit('listPlayer', rooms[roomID]);
     });
 
     socket.on('joinGame', function (data) {
@@ -33,6 +35,10 @@ io.on('connection', function (socket) {
 
         socket.broadcast.emit('receive', data.username + ' joined!');
         console.log(data.username + ' joined room ' + roomID);
+
+        if (Object.keys(rooms[roomID]).length < 10){
+            socket.broadcast.emit('listPlayer', rooms[roomID]);
+        }
     });
 
     socket.on('disconnect', function (data) {
@@ -42,6 +48,7 @@ io.on('connection', function (socket) {
                     socket.broadcast.emit('receive', value + ' disconnected!');
                     delete rooms[roomID][value];
                     console.log(value + ' left room ' + roomID);
+                    socket.broadcast.emit('listPlayer', rooms[roomID]);
                     break;
                 }
             }
