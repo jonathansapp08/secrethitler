@@ -24,6 +24,7 @@ io.on('connection', function (socket) {
         console.log(data.username + ' created room ' + roomID);
 
         socket.broadcast.emit('listPlayer', rooms[roomID]);
+        socket.broadcast.emit('playerCount', Object.keys(rooms[roomID]).length);
     });
 
     socket.on('joinGame', function (data) {
@@ -38,6 +39,7 @@ io.on('connection', function (socket) {
 
         if (Object.keys(rooms[roomID]).length < 10){
             socket.broadcast.emit('listPlayer', rooms[roomID]);
+            socket.broadcast.emit('playerCount', Object.keys(rooms[roomID]).length);
         }
     });
 

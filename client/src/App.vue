@@ -21,14 +21,12 @@
         </form>
     </div>
 
-
 </div>
-
 
 <div v-show="game" class="game">
     <div class="columns top-half" style="margin-top: 0px;">
     <div class="column is-two-thirds">
-        <Board :message="message"/>
+        <Board />
     </div>
     <div id="chat" class="column">
         <Chat :username="username" />
@@ -66,6 +64,7 @@ export default {
             game: false,
             username: null,
             roomID: null,
+            admin: false
         }
     },
     created () {  
@@ -82,6 +81,7 @@ export default {
                 this.lobby = false
                 this.game = true
                 this.username = username
+                this.admin = true
                 // this.playerNum = playerNum
             }
         },

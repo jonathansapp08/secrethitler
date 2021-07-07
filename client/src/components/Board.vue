@@ -36,8 +36,8 @@
 </div> -->
 <div>
   <div v-show="waiting" class="waiting">
-    {{message}}
-    <button @click="startGame()">Start Game</button>
+    <p>{{message}}</p>
+    <button v-show="start" @click="startGame()">Start Game</button>
   </div>
 
   <div v-show="board" class="board">
@@ -51,24 +51,41 @@
 
 </template>
 <script>
+import io from 'socket.io-client';
+let socket = io('http://localhost:3000');
 
 export default {
     name: 'Board',
-    components: {
-    },
+    props: ['admin'],
     data() {
         return{
             waiting: true,
+            admin: false,
+            start: false,
             board: false,
-            message: "Waiting for more players..."
+            message: "hi"
 
         }
     },
     created () {  
-
+      socket.on('playerCount', (playerCount) => {
+        if (playerCount < 5){
+          this.message = "Waiting for more players";
+        }
+        else if (this.admin == true){
+          this.message = "Ready to go!";
+          this.start = true;
+        }
+        else{
+          this.message = "Ready to go!";
+        }
+      });
     },
     methods: {
       startGame(){
+        this.waiting = false;
+        this.start = false;
+        this.board = true;
         console.log('hi');
       }
     }
