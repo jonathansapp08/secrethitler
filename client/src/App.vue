@@ -82,7 +82,6 @@ export default {
                 this.game = true
                 this.username = username
                 this.admin = true
-                // this.playerNum = playerNum
             }
         },
         joinGame (username, roomID) {

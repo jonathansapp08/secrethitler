@@ -56,30 +56,35 @@ let socket = io('http://localhost:3000');
 
 export default {
     name: 'Board',
-    props: ['admin'],
     data() {
         return{
             waiting: true,
-            admin: false,
+            host: false,
             start: false,
             board: false,
-            message: "hi"
+            message: "Message not Working"
 
         }
     },
-    created () {  
+    created () {
+      socket.on('ishost', (host) => {
+        if (host){
+          this.host = true;
+        }
+      });
+
       socket.on('playerCount', (playerCount) => {
-        if (playerCount < 5){
+        if (playerCount < 2){
           this.message = "Waiting for more players";
         }
-        else if (this.admin == true){
+        else if (this.host == true){
           this.message = "Ready to go!";
           this.start = true;
         }
         else{
-          this.message = "Ready to go!";
+          this.message = "Wait for host to start";
         }
-      });
+      });  
     },
     methods: {
       startGame(){

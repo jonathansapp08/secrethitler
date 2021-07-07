@@ -25,6 +25,9 @@ io.on('connection', function (socket) {
 
         socket.broadcast.emit('listPlayer', rooms[roomID]);
         socket.broadcast.emit('playerCount', Object.keys(rooms[roomID]).length);
+
+        socket.broadcast.emit('ishost', true);
+
     });
 
     socket.on('joinGame', function (data) {
