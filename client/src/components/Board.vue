@@ -37,7 +37,7 @@
 <div>
   <div v-show="waiting" class="waiting">
     <p>{{message}}</p>
-    <button v-show="start" @click="startGame()">Start Game</button>
+    <button v-show="start" @click="hostStart()">Start Game</button>
   </div>
 
   <div v-show="board" class="board">
@@ -73,6 +73,15 @@ export default {
         }
       });
 
+
+
+      socket.on('beginGame', () => {
+        this.waiting = false;
+        this.start = false;
+        this.board = true;
+        console.log('hi');
+      });
+
       socket.on('playerCount', (playerCount) => {
         if (playerCount < 2){
           this.message = "Waiting for more players";
@@ -87,11 +96,11 @@ export default {
       });  
     },
     methods: {
-      startGame(){
-        this.waiting = false;
-        this.start = false;
-        this.board = true;
-        console.log('hi');
+
+
+      hostStart(){
+        console.log("hi");
+        socket.emit('hostStart', true);
       }
     }
 }

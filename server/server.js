@@ -68,6 +68,22 @@ io.on('connection', function (socket) {
         io.emit('receive', newText);
     });
 
+
+
+
+
+
+    socket.on('hostStart', (start) => {
+        if (start){
+            io.emit('beginGame');
+        }
+      });
+
+
+
+
+
+
 });
 
 http.listen(3000, function () {
