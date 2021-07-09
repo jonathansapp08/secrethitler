@@ -51,8 +51,7 @@
 
 </template>
 <script>
-import io from 'socket.io-client';
-let socket = io('http://localhost:3000');
+import socket from '../socket';
 
 export default {
     name: 'Board',
@@ -62,28 +61,25 @@ export default {
             host: false,
             start: false,
             board: false,
-            message: "Message not Working"
-
+            message: "Waiting for more players"
         }
     },
     created () {
       socket.on('ishost', (host) => {
         if (host){
           this.host = true;
+          console.log("You are a host")
         }
       });
-
-
 
       socket.on('beginGame', () => {
         this.waiting = false;
         this.start = false;
         this.board = true;
-        console.log('hi');
       });
 
       socket.on('playerCount', (playerCount) => {
-        if (playerCount < 2){
+        if (playerCount < 5){
           this.message = "Waiting for more players";
         }
         else if (this.host == true){
@@ -96,10 +92,7 @@ export default {
       });  
     },
     methods: {
-
-
       hostStart(){
-        console.log("hi");
         socket.emit('hostStart', true);
       }
     }

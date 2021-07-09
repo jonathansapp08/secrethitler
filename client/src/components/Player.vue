@@ -23,8 +23,7 @@
 </template>
 
 <script>
-import io from 'socket.io-client';
-let socket = io('http://localhost:3000');
+import socket from '../socket';
 
 export default {
     name: 'App',

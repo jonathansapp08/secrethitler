@@ -18,16 +18,11 @@ io.on('connection', function (socket) {
 
         rooms[roomID]={[data.username]: socket.id};
 
-        socket.broadcast.emit('receive', 'Other players can join with: ' + roomID);
-        socket.broadcast.emit('receive', data.username + ' joined!');
-        socket.emit('newGame', roomID);
+        io.to(socket.id).emit('receive', 'Other players can join with: ' + roomID);
+        io.to(socket.id).emit('receive', data.username + ' joined!');
+        io.to(socket.id).emit('newGame', roomID);
+        io.to(socket.id).emit('ishost', true);
         console.log(data.username + ' created room ' + roomID);
-
-        socket.broadcast.emit('listPlayer', rooms[roomID]);
-        socket.broadcast.emit('playerCount', Object.keys(rooms[roomID]).length);
-
-        socket.broadcast.emit('ishost', true);
-
     });
 
     socket.on('joinGame', function (data) {
@@ -37,12 +32,12 @@ io.on('connection', function (socket) {
 
         rooms[roomID][username] = socket.id;
 
-        socket.broadcast.emit('receive', data.username + ' joined!');
+        io.in(roomID).emit('receive', data.username + ' joined!');
         console.log(data.username + ' joined room ' + roomID);
 
         if (Object.keys(rooms[roomID]).length < 10){
-            socket.broadcast.emit('listPlayer', rooms[roomID]);
-            socket.broadcast.emit('playerCount', Object.keys(rooms[roomID]).length);
+            io.in(roomID).emit('listPlayer', rooms[roomID]);
+            io.in(roomID).emit('playerCount', Object.keys(rooms[roomID]).length);
         }
     });
 
@@ -50,10 +45,10 @@ io.on('connection', function (socket) {
         try {
             for (let value in rooms[roomID]){
                 if (rooms[roomID][value] == socket.id){
-                    socket.broadcast.emit('receive', value + ' disconnected!');
+                    io.in(roomID).emit('receive', value + ' disconnected!');
                     delete rooms[roomID][value];
                     console.log(value + ' left room ' + roomID);
-                    socket.broadcast.emit('listPlayer', rooms[roomID]);
+                    io.in(roomID).emit('listPlayer', rooms[roomID]);
                     break;
                 }
             }
@@ -70,18 +65,11 @@ io.on('connection', function (socket) {
 
 
 
-
-
-
     socket.on('hostStart', (start) => {
         if (start){
             io.emit('beginGame');
         }
       });
-
-
-
-
 
 
 });

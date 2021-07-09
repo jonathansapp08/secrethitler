@@ -14,33 +14,32 @@
 </template>
 
 <script>
-    import io from 'socket.io-client';
-    let socket = io('http://localhost:3000');
+import socket from '../socket';
 
-    export default {
-        name: 'Chat',
-        props: ['username'],
-        data() {
-            return {
-                textInput: null,
-                textOutput: []
-            }
-        },
-        methods: {
-            submitText: function (event) {
-                event.preventDefault();
-                if (this.textInput != null){
-                    socket.emit('send_message', this.username, this.textInput);
-                }
-            }
-        },
-        created: function () {
-            socket.on('receive', (text) => {
-                this.textOutput.push(text);
-                this.textInput = null;
-            });
+export default {
+    name: 'Chat',
+    props: ['username'],
+    data() {
+        return {
+            textInput: null,
+            textOutput: []
         }
+    },
+    methods: {
+        submitText: function (event) {
+            event.preventDefault();
+            if (this.textInput != null){
+                socket.emit('send_message', this.username, this.textInput);
+            }
+        }
+    },
+    created: function () {
+        socket.on('receive', (text) => {
+            this.textOutput.push(text);
+            this.textInput = null;
+        });
     }
+}
 </script>
 
 <style scoped>

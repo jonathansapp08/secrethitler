@@ -48,8 +48,7 @@ import Board from './components/Board.vue';
 import Player from './components/Player.vue';
 import Chat from './components/Chat.vue';
 
-import io from 'socket.io-client';
-let socket = io('http://localhost:3000');
+import socket from '../src/socket';
 
 export default {
     name: 'App',
