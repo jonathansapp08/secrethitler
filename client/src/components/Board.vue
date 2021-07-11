@@ -1,39 +1,4 @@
 <template>
-<!-- <div class="columns ml-3 mr-3 mt-3">
-  <div class="column">
-    First column
-  </div>
-  <div class="column">
-    Second column
-  </div>
-  <div class="column">
-    Third column
-  </div>
-  <div class="column">
-    Fourth column
-  </div>
-    <div class="column">
-    Fourth column
-  </div>
-</div> -->
-
-<!-- <div class="columns m-3">
-  <div class="column">
-    First column
-  </div>
-  <div class="column">
-    Second column
-  </div>
-  <div class="column">
-    Third column
-  </div>
-  <div class="column">
-    Fourth column
-  </div>
-    <div class="column">
-    Fourth column
-  </div>
-</div> -->
 <div>
   <div v-show="waiting" class="waiting">
     <p>{{message}}</p>
@@ -46,7 +11,6 @@
 
     <img src="../assets/policy.png" alt="Girl in a jacket" width="75" height="600">
   </div>
-
 </div>
 
 </template>
@@ -59,6 +23,7 @@ export default {
         return{
             waiting: true,
             host: false,
+            players: null,
             start: false,
             board: false,
             message: "Waiting for more players"
@@ -72,14 +37,9 @@ export default {
         }
       });
 
-      socket.on('beginGame', () => {
-        this.waiting = false;
-        this.start = false;
-        this.board = true;
-      });
-
       socket.on('playerCount', (playerCount) => {
-        if (playerCount < 5){
+        this.players = playerCount;
+        if (Object.keys(playerCount).length < 2){
           this.message = "Waiting for more players";
         }
         else if (this.host == true){
@@ -89,12 +49,20 @@ export default {
         else{
           this.message = "Wait for host to start";
         }
-      });  
+      });
+      
+      socket.on('showBoard', () => {
+        this.waiting = false;
+        this.start = false;
+        this.board = true;
+      });
+
     },
     methods: {
       hostStart(){
-        socket.emit('hostStart', true);
-      }
+        console.log("Beginning Game!");
+        socket.emit('hostStart', this.playersm);
+      },
     }
 }
 </script>

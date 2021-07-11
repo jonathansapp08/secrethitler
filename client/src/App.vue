@@ -70,8 +70,6 @@ export default {
         socket.on('newGame', (roomID) => {
             this.roomID = roomID;
         });
-         
-        window.addEventListener('beforeunload', this.leaveGames);
     },
     methods: {
         createGame (username) {
@@ -115,36 +113,4 @@ export default {
     overflow-y: auto;
     word-break: break-word;
 }
-    
-/* .Board {
-    height: 50vh;
-    width: 50vw;
-    word-break: break-word;
-
-    border: 1px solid red;
-}
-
-.player {
-    height: 50vh;
-    word-break: break-word;
-
-    border: 1px solid blue;
-}
-
-#border {
-    border-right: 2px solid cyan;
-}
-@media (max-width: 1000px) {
-    #app {
-        flex-direction: column;
-    }
-    #Board {
-        width: 100vw;
-        height: 50vh;
-    }
-    #input {
-        width: 100vw;
-        height: 50vh;
-    }
-} */
 </style>
