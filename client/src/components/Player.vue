@@ -32,8 +32,7 @@ import socket from '../socket';
 
 export default {
     name: 'App',
-    components: {
-    },
+    props: ['user'],
     data() {
         return{
             players: [],
@@ -58,13 +57,13 @@ export default {
     },
     methods: {
       pick(username){
-        if (this.picking == true){
+        if (this.picking == true && username != this.user){
           console.log(username);
           socket.emit('receivePick', username);
           this.picking = false;
         }
         else {
-          console.log("Not time to pick!");
+          console.log("Not time to pick and/or you can't pick yourself!");
         }
 
       },

@@ -35,7 +35,7 @@
 
     <div class="columns">
     <div class="column">
-        <Player />
+        <Player :user="username" />
     </div>
     </div>
 </div>
