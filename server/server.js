@@ -83,7 +83,6 @@ io.on('connection', function (socket) {
         secret(roomID, players);
     });
 
-
     // Select chancellor????
     socket.on('pickChancellor', (roomID) => {
         console.log("Hello");
@@ -91,17 +90,14 @@ io.on('connection', function (socket) {
         console.log(rooms[roomID]['player']);
         io.in(roomID).emit('receive', ' ayyyy joined!');
     });
-
-
-
     
-
+    // Vote yes or no
     socket.on('receiveVote', (vote) => {      
         rooms[roomID]['vote'][socket.id] = vote;
 
         var yes = 0;
         var no = 0;
-
+        
         if (Object.keys(rooms[roomID]['vote']).length == Object.keys(rooms[roomID]['players']).length){
             for (votes in rooms[roomID]['vote']){
                 if (rooms[roomID]['vote'][votes] == 'y'){
@@ -111,16 +107,17 @@ io.on('connection', function (socket) {
                     no += 1
                 }
             }
+            // If majority yes then pass
             if (yes > no) {
                 io.in(roomID).emit('receive',"Vote Passes");
                 // socket.emit('drawCards');
             }
+            // Else break and go back to step one with new President
             else {
                 io.in(roomID).emit('receive',"Vote Fails");
                 rooms[roomID]['failCounter'] += 1;
                 endTurn(roomID);
             }
-            console.log(rooms[roomID]['vote']);
             rooms[roomID]['vote'] = {}
         }
     });
@@ -139,40 +136,12 @@ io.on('connection', function (socket) {
 
 
 function secret(roomID, players){
-
-
     //Assigning Roles
     assignRoles(players);
 
     //Pick a chancellor
     assignChancellor(roomID);
-
-    //     vote(roomID);
-
-
-    //     // End turn
-    //     endTurn(players);
-    // // }
-
-
-
-
-
-
-    // Pick chancellor
-
-
- 
-
-
-    // WAIT UNTIL ALL PLAYERS HAVE SELECTED
-    // while (rooms[roomID]['votes'] != Object.keys(players).length){
-    //     console.log(rooms[roomID]['vote']);
-    // }
-
 }
-
-
 
 function assignRoles(players){
     if (Object.keys(players).length == 2){
@@ -224,64 +193,18 @@ function assignChancellor(roomID){
     io.to(rooms[roomID]['turnOrder'][0]).emit('allowPick');
 }
 
-
-
-// VOTING
-function vote(roomID){
-    io.in(roomID).emit('receive', 'Vote yes or no');
-    io.in(roomID).emit('showVote');
-}
-
-
-
-
-
-
 function endTurn(roomID){
-    // var newOrder = {};
-    // var counter = 0;
-    // for ( player in rooms[roomID]['players']){
-    //     if (counter = 0){
-    //         continue
-    //     }
-    //     console.log(rooms[roomID]['players'][player]);
-    //     newOrder[player] = rooms[roomID]['players'][player];
-    //     counter += 1;
-    // }
-
-    // console.log(newOrder[player]);
-
-
-    // rooms[roomID]['players'] = newOrder;
-    // console.log(rooms);
-    
-    // var counter = 0;
-    // for ( player in rooms[roomID]['players']){
-    //     if (counter = 0){
-    //         newOrder[player] = rooms[roomID]['players'][player];
-    //     }
-    //     break
-    // }
-
-    console.log(rooms[roomID]['turnOrder']);
-
     var first = []
     first = rooms[roomID]['turnOrder'][0];
     rooms[roomID]['turnOrder'].shift();
     rooms[roomID]['turnOrder'].push(first);
     
-    console.log(rooms[roomID]['turnOrder']);
-
+    // Start next turn
     assignChancellor(roomID);
-
 }
 
 
-
-
-// 3. Vote yes or no
-//     1. If majority yes then pass
-//     2. Else break and go back to step one with new President
+// TODO
 // 4. If 3 fascist cards down, ask it chancellor is hitler
 //     1. If yes end game
 //     2. Else pass
@@ -300,9 +223,6 @@ function endTurn(roomID){
 //     3. Enact executive power
 // 12. Check cards
 //     1. If fewer than 3, shuffle everything
-
-
-
 
 
 http.listen(3000, function () {
