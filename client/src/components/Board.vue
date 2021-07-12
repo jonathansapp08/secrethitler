@@ -61,7 +61,7 @@ export default {
     methods: {
       hostStart(){
         console.log("Beginning Game!");
-        socket.emit('hostStart', this.playersm);
+        socket.emit('hostStart', this.players);
       },
     }
 }

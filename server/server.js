@@ -8,7 +8,7 @@ const io = require('socket.io')(http, {
     }
 });
 
-const rooms = {};
+var rooms = {};
 
 io.on('connection', function (socket) {
     console.log('Connection established');
@@ -70,22 +70,66 @@ io.on('connection', function (socket) {
 // FOR THE GAME
     socket.on('hostStart', (players) => {
         io.in(roomID).emit('showBoard');
+
+        rooms[roomID]['roles'] = {}
+        rooms[roomID]['vote'] = {}
+        rooms[roomID]['failCounter'] = 0
+        rooms[roomID]['turnOrder'] = []
+
+        for ( player in rooms[roomID]['players']){
+            rooms[roomID]['turnOrder'].push(rooms[roomID]['players'][player]);
+        }
+
         secret(roomID, players);
     });
 
 
     // Select chancellor????
-    socket.on('receivePick', (username) => {
-        console.log("player voted", username)
-        // votes.push(vote);
-
+    socket.on('pickChancellor', (roomID) => {
+        console.log("Hello");
+        console.log(rooms);
+        console.log(rooms[roomID]['player']);
+        io.in(roomID).emit('receive', ' ayyyy joined!');
     });
 
-    socket.on('receiveVote', (vote) => {
-        rooms[roomID]['vote'] = [];
-        rooms[roomID]['vote'].push(vote);
+
+
+    
+
+    socket.on('receiveVote', (vote) => {      
+        rooms[roomID]['vote'][socket.id] = vote;
+
+        var yes = 0;
+        var no = 0;
+
+        if (Object.keys(rooms[roomID]['vote']).length == Object.keys(rooms[roomID]['players']).length){
+            for (votes in rooms[roomID]['vote']){
+                if (rooms[roomID]['vote'][votes] == 'y'){
+                    yes += 1
+                }
+                else {
+                    no += 1
+                }
+            }
+            if (yes > no) {
+                io.in(roomID).emit('receive',"Vote Passes");
+                // socket.emit('drawCards');
+            }
+            else {
+                io.in(roomID).emit('receive',"Vote Fails");
+                rooms[roomID]['failCounter'] += 1;
+                endTurn(roomID);
+            }
+            console.log(rooms[roomID]['vote']);
+            rooms[roomID]['vote'] = {}
+        }
     });
 
+    socket.on('receivePick', (pick) => { 
+        io.in(roomID).emit('receive',"Should " + pick + " become the chancellor?")
+        io.in(roomID).emit('receive', 'Vote yes or no');
+        io.in(roomID).emit('showVote');
+    });
 
 });
 
@@ -96,21 +140,19 @@ io.on('connection', function (socket) {
 
 function secret(roomID, players){
 
-    console.log(players)
 
-    // while (true) {
-        // Assigning Roles
-        // assignRoles(roomID);
+    //Assigning Roles
+    assignRoles(players);
 
-        // Pick a chancellor
-        assignChancellor(players);
+    //Pick a chancellor
+    assignChancellor(roomID);
 
-
+    //     vote(roomID);
 
 
-        // End turn
-        endTurn(players);
-    // }
+    //     // End turn
+    //     endTurn(players);
+    // // }
 
 
 
@@ -120,9 +162,7 @@ function secret(roomID, players){
     // Pick chancellor
 
 
-    // VOTING
-    io.in(roomID).emit('receive', 'Vote yes or no');
-    io.in(roomID).emit('showVote');
+ 
 
 
     // WAIT UNTIL ALL PLAYERS HAVE SELECTED
@@ -136,24 +176,25 @@ function secret(roomID, players){
 
 function assignRoles(players){
     if (Object.keys(players).length == 2){
-        const roles=['Liberal', 'Liberal', 'Liberal', 'Fascist', 'Hitler'];
+        var roles=['Liberal', 'Liberal', 'Liberal', 'Fascist', 'Hitler'];
     }
     if (Object.keys(players).length == 6){
-        const roles=['Liberal', 'Liberal', 'Liberal', 'Liberal', 'Fascist', 'Hitler'];
+        var roles=['Liberal', 'Liberal', 'Liberal', 'Liberal', 'Fascist', 'Hitler'];
     }
     if (Object.keys(players).length == 7){
-        const roles=['Liberal', 'Liberal', 'Liberal', 'Liberal', 'Fascist', 'Fascist', 'Hitler'];
+        var roles=['Liberal', 'Liberal', 'Liberal', 'Liberal', 'Fascist', 'Fascist', 'Hitler'];
     }
     if (Object.keys(players).length == 8){
-        const roles=['Liberal', 'Liberal', 'Liberal', 'Liberal', 'Liberal', 'Fascist', 'Fascist', 'Hitler'];
+        var roles=['Liberal', 'Liberal', 'Liberal', 'Liberal', 'Liberal', 'Fascist', 'Fascist', 'Hitler'];
     }
     if (Object.keys(players).length == 9){
-        const roles=['Liberal', 'Liberal', 'Liberal', 'Liberal', 'Liberal', 'Fascist', 'Fascist', 'Fascist', 'Hitler'];
+        var roles=['Liberal', 'Liberal', 'Liberal', 'Liberal', 'Liberal', 'Fascist', 'Fascist', 'Fascist', 'Hitler'];
     }
     if (Object.keys(players).length == 10){
-        const roles=['Liberal', 'Liberal', 'Liberal', 'Liberal', 'Liberal', 'Liberal', 'Fascist', 'Fascist', 'Fascist', 'Hitler'];
+        var roles=['Liberal', 'Liberal', 'Liberal', 'Liberal', 'Liberal', 'Liberal', 'Fascist', 'Fascist', 'Fascist', 'Hitler'];
     }
 
+    
     const badGuys = [];
 
     for (let key in players){
@@ -164,6 +205,10 @@ function assignRoles(players){
         if (randomAssign == 'Fascist' || randomAssign == 'Hitler'){
             badGuys.push(key)
         }
+
+        rooms[roomID]['roles'][key] = randomAssign;
+
+
         roles.indexOf(randomAssign) !== -1 && roles.splice(roles.indexOf(randomAssign), 1)
     } 
     //Let bad guys know who other bad guyas are
@@ -172,33 +217,62 @@ function assignRoles(players){
             io.to(players[key]).emit('receive', 'The "bad guys" are ' + badGuys);
         }
     }
-
-
-
-
-
-
-
 }
 
-function assignChancellor(players){
-    for (let player in players){
-        console.log(players[player]);
-        break
-    }
-    // console.log(players[Object.keys(players)[0]]);
-
-
+function assignChancellor(roomID){
+    io.to(rooms[roomID]['turnOrder'][0]).emit('receive', 'Pick your chencellor');
+    io.to(rooms[roomID]['turnOrder'][0]).emit('allowPick');
 }
 
-function endTurn(players){
-    // console.log(players);
-    // var first = players[0];
-    // players.shift();
 
-    // players.push(first);
 
-    // console.log(players);
+// VOTING
+function vote(roomID){
+    io.in(roomID).emit('receive', 'Vote yes or no');
+    io.in(roomID).emit('showVote');
+}
+
+
+
+
+
+
+function endTurn(roomID){
+    // var newOrder = {};
+    // var counter = 0;
+    // for ( player in rooms[roomID]['players']){
+    //     if (counter = 0){
+    //         continue
+    //     }
+    //     console.log(rooms[roomID]['players'][player]);
+    //     newOrder[player] = rooms[roomID]['players'][player];
+    //     counter += 1;
+    // }
+
+    // console.log(newOrder[player]);
+
+
+    // rooms[roomID]['players'] = newOrder;
+    // console.log(rooms);
+    
+    // var counter = 0;
+    // for ( player in rooms[roomID]['players']){
+    //     if (counter = 0){
+    //         newOrder[player] = rooms[roomID]['players'][player];
+    //     }
+    //     break
+    // }
+
+    console.log(rooms[roomID]['turnOrder']);
+
+    var first = []
+    first = rooms[roomID]['turnOrder'][0];
+    rooms[roomID]['turnOrder'].shift();
+    rooms[roomID]['turnOrder'].push(first);
+    
+    console.log(rooms[roomID]['turnOrder']);
+
+    assignChancellor(roomID);
 
 }
 

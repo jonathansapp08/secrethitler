@@ -38,6 +38,7 @@ export default {
         return{
             players: [],
             vote: false,
+            picking: false
         }
     },
     created () {  
@@ -48,12 +49,24 @@ export default {
       socket.on('showVote', () => {
         this.vote = true; 
       });
+
+      socket.on('allowPick', () =>{
+        console.log("PICK!!!!")
+        this.picking = true
+      });
          
     },
     methods: {
       pick(username){
-        console.log(username);
-        socket.emit('receivePick', username);
+        if (this.picking == true){
+          console.log(username);
+          socket.emit('receivePick', username);
+          this.picking = false;
+        }
+        else {
+          console.log("Not time to pick!");
+        }
+
       },
       
       submitVote(vote){
