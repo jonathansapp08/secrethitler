@@ -75,6 +75,11 @@ io.on('connection', function (socket) {
         rooms[roomID]['vote'] = {}
         rooms[roomID]['failCounter'] = 0
         rooms[roomID]['turnOrder'] = []
+        rooms[roomID]['cards'] = []
+        rooms[roomID]['chancellor'] = []
+        rooms[roomID]['liberal'] = 0
+        rooms[roomID]['fascist'] = 0
+
 
         for ( player in rooms[roomID]['players']){
             rooms[roomID]['turnOrder'].push(rooms[roomID]['players'][player]);
@@ -83,14 +88,7 @@ io.on('connection', function (socket) {
         secret(roomID, players);
     });
 
-    // Select chancellor????
-    socket.on('pickChancellor', (roomID) => {
-        console.log("Hello");
-        console.log(rooms);
-        console.log(rooms[roomID]['player']);
-        io.in(roomID).emit('receive', ' ayyyy joined!');
-    });
-    
+
     // Vote yes or no
     socket.on('receiveVote', (vote) => {      
         rooms[roomID]['vote'][socket.id] = vote;
@@ -109,23 +107,79 @@ io.on('connection', function (socket) {
             }
             // If majority yes then pass
             if (yes > no) {
+
+                
+                
+
                 io.in(roomID).emit('receive',"Vote Passes");
-                // socket.emit('drawCards');
+                var hand = drawCards(roomID, 3)
+                // console.log(hand);
+
+
+
+
+            
+
+
+
+                io.to(rooms[roomID]['turnOrder'][0]).emit('receiveCards', hand);
             }
             // Else break and go back to step one with new President
             else {
+                rooms[roomID]['chancellor'] = []
                 io.in(roomID).emit('receive',"Vote Fails");
                 rooms[roomID]['failCounter'] += 1;
                 endTurn(roomID);
             }
             rooms[roomID]['vote'] = {}
+            // console.log(rooms);
         }
     });
+
+    socket.on('passToChancellor', (hand) => {
+        for (player in rooms[roomID]['players']){
+            var chancellor = []
+            chancellor.push(player);
+            if (chancellor[0] == rooms[roomID]['chancellor'][0]) {
+                io.to(rooms[roomID]['players'][player]).emit('receiveCards', hand);
+                break
+            }
+            chancellor = []
+        }
+    });
+
+
+
+    socket.on('playCard', (card) => {
+        if (card == 'Liberal'){
+            rooms[roomID]['liberal'] += 1
+            rooms[roomID]['chancellor'] = []
+            io.in(roomID).emit('addLiberal', rooms[roomID]['liberal']);
+            endTurn(roomID);
+        }
+        if (card == 'Fascist'){
+            rooms[roomID]['fascist'] += 1
+            rooms[roomID]['chancellor'] = []
+            io.in(roomID).emit('addFascist', rooms[roomID]['fascist']);
+            endTurn(roomID);
+        }
+
+        if (rooms[roomID]['liberal'] == 5){
+            // endGame()
+        }
+        if (rooms[roomID]['fascist'] == 5){
+            // endGame()
+        }
+    });
+
+
+
 
     socket.on('receivePick', (pick) => { 
         io.in(roomID).emit('receive',"Should " + pick + " become the chancellor?")
         io.in(roomID).emit('receive', 'Vote yes or no');
         io.in(roomID).emit('showVote');
+        rooms[roomID]['chancellor'].push(pick);
     });
 
 });
@@ -202,6 +256,29 @@ function endTurn(roomID){
     // Start next turn
     assignChancellor(roomID);
 }
+
+
+policyTiles = ["Liberal", "Liberal", "Liberal", "Liberal", "Liberal", "Liberal", 
+"Fascist", "Fascist", "Fascist", "Fascist", "Fascist", "Fascist", "Fascist", "Fascist", "Fascist", "Fascist", "Fascist", 
+]
+
+
+function drawCards(roomID, amount){
+    if (rooms[roomID]['cards'].length < amount){
+        rooms[roomID]['cards']=policyTiles;
+    }
+
+    var hand = []
+    while (hand.length < amount){
+        var randomTile = rooms[roomID]['cards'][Math.floor(Math.random() * rooms[roomID]['cards'].length)];
+        hand.push(randomTile);
+        rooms[roomID]['cards'].indexOf(randomTile) !== -1 && rooms[roomID]['cards'].splice(rooms[roomID]['cards'].indexOf(randomTile), 1);
+    }
+    
+    return hand
+}
+
+
 
 
 // TODO

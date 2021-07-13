@@ -10,6 +10,10 @@
     <img src="../assets/fascistboard78.png" alt="Girl in a jacket" width="470" height="600">
 
     <img src="../assets/policy.png" alt="Girl in a jacket" width="75" height="600">
+
+    <p>{{liberal}}</p>
+    <p>{{fascist}}</p>
+
   </div>
 </div>
 
@@ -26,7 +30,9 @@ export default {
             players: null,
             start: false,
             board: false,
-            message: "Waiting for more players"
+            message: "Waiting for more players",
+            liberal: null,
+            fascist: null
         }
     },
     created () {
@@ -55,6 +61,19 @@ export default {
         this.waiting = false;
         this.start = false;
         this.board = true;
+      });
+
+      socket.on('addLiberal', (liberalCount) => {
+        this.liberal = liberalCount;
+        if (this.liberal == 5){
+          this.waiting = true;
+          this.start = true;
+          this.board = false;
+        }
+      });
+
+      socket.on('addFascist', (fascistCount) => {
+        this.fascist = fascistCount;
       });
 
     },

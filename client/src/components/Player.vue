@@ -24,6 +24,10 @@
     <button @click="submitVote('n')">No</button>
 </div>
 
+<div v-show="hand" v-for="(card) in cards" :key="card" class="hand">
+    <button @click="discardCard(card)">{{card}}</button>
+</div>
+
 </div>
 </template>
 
@@ -37,7 +41,8 @@ export default {
         return{
             players: [],
             vote: false,
-            picking: false
+            hand: false,
+            cards: []
         }
     },
     created () {  
@@ -52,6 +57,12 @@ export default {
       socket.on('allowPick', () =>{
         console.log("PICK!!!!")
         this.picking = true
+      });
+
+      socket.on('receiveCards', (cards) =>{
+        console.log(cards);
+        this.hand = true
+        this.cards = cards
       });
          
     },
@@ -73,7 +84,28 @@ export default {
         socket.emit('receiveVote', vote);
         this.vote = false;
       },
-      
+
+      discardCard(card){
+        if (this.cards.length == 2){
+          const index = this.cards.indexOf(card);
+          if (index > -1) {
+            this.cards.splice(index, 1);
+          }
+          console.log("Discarding " + card);
+          socket.emit('playCard', this.cards);
+        }
+
+        if (this.cards.length == 3){
+          const index = this.cards.indexOf(card);
+          if (index > -1) {
+            this.cards.splice(index, 1);
+          }
+          console.log("Discarding " + card);
+          socket.emit('passToChancellor', this.cards);
+          this.hand = false;
+        }
+        this.cards = []
+      },
     }
 }
 </script>
