@@ -258,23 +258,20 @@ function endTurn(roomID){
 }
 
 
-policyTiles = ["Liberal", "Liberal", "Liberal", "Liberal", "Liberal", "Liberal", 
+var policyTiles = ["Liberal", "Liberal", "Liberal", "Liberal", "Liberal", "Liberal", 
 "Fascist", "Fascist", "Fascist", "Fascist", "Fascist", "Fascist", "Fascist", "Fascist", "Fascist", "Fascist", "Fascist", 
 ]
 
-
 function drawCards(roomID, amount){
     if (rooms[roomID]['cards'].length < amount){
-        rooms[roomID]['cards']=policyTiles;
+        rooms[roomID]['cards'] = policyTiles.slice();
     }
-
     var hand = []
     while (hand.length < amount){
         var randomTile = rooms[roomID]['cards'][Math.floor(Math.random() * rooms[roomID]['cards'].length)];
         hand.push(randomTile);
         rooms[roomID]['cards'].indexOf(randomTile) !== -1 && rooms[roomID]['cards'].splice(rooms[roomID]['cards'].indexOf(randomTile), 1);
-    }
-    
+    }    
     return hand
 }
 
