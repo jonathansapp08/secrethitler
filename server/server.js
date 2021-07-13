@@ -1,5 +1,6 @@
 const server = require('express')();
 const http = require('http').createServer(server);
+const { fail } = require('assert');
 const { Console } = require('console');
 const randomstring = require('randomstring');
 const io = require('socket.io')(http, {
@@ -89,13 +90,14 @@ io.on('connection', function (socket) {
     });
 
 
-    // Vote yes or no
-    socket.on('receiveVote', (vote) => {      
+     // Vote yes or no
+     socket.on('receiveVote', (vote) => {      
         rooms[roomID]['vote'][socket.id] = vote;
 
         var yes = 0;
         var no = 0;
         
+        // If there are equal number of votes as there are players
         if (Object.keys(rooms[roomID]['vote']).length == Object.keys(rooms[roomID]['players']).length){
             for (votes in rooms[roomID]['vote']){
                 if (rooms[roomID]['vote'][votes] == 'y'){
@@ -107,34 +109,52 @@ io.on('connection', function (socket) {
             }
             // If majority yes then pass
             if (yes > no) {
-
-                
-                
-
                 io.in(roomID).emit('receive',"Vote Passes");
+                // If >= 3 fascist cards and Chancellor is Hitler, end game
+                if (rooms[roomID]['liberal'] >= 3) {
+                    for (player in rooms[roomID]['roles']){
+                        if (rooms[roomID]['roles'][player] == 'Hitler' && player == rooms[roomID]['chancellor'][0]){
+                            console.log("GG")
+                            // endGame()
+                            break
+                        }
+                    }
+                }
+                // Reset fail counter and give President Cards
+                rooms[roomID]['failCounter'] = 0;
                 var hand = drawCards(roomID, 3)
-                // console.log(hand);
-
-
-
-
-            
-
-
-
-                io.to(rooms[roomID]['turnOrder'][0]).emit('receiveCards', hand);
+                io.to(rooms[roomID]['turnOrder'][0]).emit('receiveCards', hand); 
             }
-            // Else break and go back to step one with new President
+            // Else add to fail counter and end turn
             else {
                 rooms[roomID]['chancellor'] = []
                 io.in(roomID).emit('receive',"Vote Fails");
+                // If vote fails three times in a row
                 rooms[roomID]['failCounter'] += 1;
+                if (rooms[roomID]['failCounter'] == 3){
+                    drawCards(roomID, 1)
+                    io.in(roomID).emit('receive',"Vote failed 3 times in a row...");
+                    var hand = drawCards(roomID, 1)
+                    // If card drawn is liberal
+                    if (hand[0] == 'Liberal') {
+                        rooms[roomID]['liberal'] += 1;
+                        io.in(roomID).emit('addLiberal', rooms[roomID]['liberal']);
+                    }
+                    // If card drawn is fascist
+                    else if (hand[0] == 'Fascist') {
+                        rooms[roomID]['fascist'] += 1;
+                        io.in(roomID).emit('addFascist', rooms[roomID]['fascist']);
+                    }
+                    rooms[roomID]['failCounter'] = 0;
+                }
                 endTurn(roomID);
             }
             rooms[roomID]['vote'] = {}
-            // console.log(rooms);
         }
     });
+
+
+
 
     socket.on('passToChancellor', (hand) => {
         for (player in rooms[roomID]['players']){
@@ -263,9 +283,11 @@ var policyTiles = ["Liberal", "Liberal", "Liberal", "Liberal", "Liberal", "Liber
 ]
 
 function drawCards(roomID, amount){
+    // Reset deck if not enough cards
     if (rooms[roomID]['cards'].length < amount){
         rooms[roomID]['cards'] = policyTiles.slice();
     }
+    // Drawing hand
     var hand = []
     while (hand.length < amount){
         var randomTile = rooms[roomID]['cards'][Math.floor(Math.random() * rooms[roomID]['cards'].length)];
@@ -279,15 +301,10 @@ function drawCards(roomID, amount){
 
 
 // TODO
-// 4. If 3 fascist cards down, ask it chancellor is hitler
-//     1. If yes end game
-//     2. Else pass
-// 5. President draws thee cards
-// 6. President discards one card
-// 7. Chancellor takes the two leftover cards
 // 8. If 5 fascist cards chancellor can request veto
 //     1. If president agrees, break
-// 9. Chancellor plays one card
+
+
 // 10. Did the liberal board get full?
 //     1. Yes end game
 //     2. No continue
@@ -295,8 +312,6 @@ function drawCards(roomID, amount){
 //     1. Yes end game
 //     2. No check for executive power
 //     3. Enact executive power
-// 12. Check cards
-//     1. If fewer than 3, shuffle everything
 
 
 http.listen(3000, function () {
