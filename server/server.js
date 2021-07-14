@@ -123,7 +123,13 @@ io.on('connection', function (socket) {
                 // Reset fail counter and give President Cards
                 rooms[roomID]['failCounter'] = 0;
                 var hand = drawCards(roomID, 3)
-                io.to(rooms[roomID]['turnOrder'][0]).emit('receiveCards', hand); 
+                io.to(rooms[roomID]['turnOrder'][0]).emit('receiveCards', hand);
+                
+
+
+                // ADD VETO POWER IF 5 FASCIST CARDS PLAYED 
+
+
             }
             // Else add to fail counter and end turn
             else {
@@ -187,7 +193,7 @@ io.on('connection', function (socket) {
         if (rooms[roomID]['liberal'] == 5){
             // endGame()
         }
-        if (rooms[roomID]['fascist'] == 5){
+        if (rooms[roomID]['fascist'] == 6){
             // endGame()
         }
     });
