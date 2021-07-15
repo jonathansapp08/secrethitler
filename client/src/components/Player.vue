@@ -5,8 +5,7 @@
 <div @click="pick(username)" class="card" style="text-align: center;">
   <div class="card-content">
     <div class="media">
-      <div class="media-content">
-        
+      <div class="media-content"> 
         <p class="title is-4">{{username}}</p>
       </div>
     </div>
@@ -28,6 +27,15 @@
     <button @click="discardCard(card)">{{card}}</button>
 </div>
 
+<div v-show="chancellor" class="veto">
+    <button @click="vetoChancellor()">Veto</button>
+</div>
+
+<div v-show="president" class="veto">
+    <button @click="vetoPresident('y')">Yes</button>
+    <button @click="vetoPresident('n')">No</button>
+</div>
+
 </div>
 </template>
 
@@ -42,7 +50,10 @@ export default {
             players: [],
             vote: false,
             hand: false,
-            cards: []
+            cards: [],
+            chancellor: false,
+            president: false,
+            picking: false
         }
     },
     created () {  
@@ -55,21 +66,39 @@ export default {
       });
 
       socket.on('allowPick', () =>{
-        console.log("PICK!!!!")
         this.picking = true
       });
 
       socket.on('receiveCards', (cards) =>{
-        console.log(cards);
         this.hand = true
         this.cards = cards
       });
-         
+
+      socket.on('chancellorVeto', () =>{
+        this.chancellor = true
+      });
+
+      socket.on('presidentVeto', () =>{
+        this.president = true
+      });
+
+      socket.on('toggleHand', () =>{
+        console.log(this.hand)
+
+        if (this.hand == false){
+          this.hand = true;
+        }
+        else if (this.hand == true){
+          this.hand = false;
+        }
+
+
+      });
+      
     },
     methods: {
       pick(username){
         if (this.picking == true && username != this.user){
-          console.log(username);
           socket.emit('receivePick', username);
           this.picking = false;
         }
@@ -80,12 +109,13 @@ export default {
       },
       
       submitVote(vote){
-        console.log(vote);
         socket.emit('receiveVote', vote);
         this.vote = false;
       },
 
       discardCard(card){
+        console.log("Cards before discard " + this.cards);
+
         if (this.cards.length == 2){
           const index = this.cards.indexOf(card);
           if (index > -1) {
@@ -94,17 +124,36 @@ export default {
           console.log("Discarding " + card);
           socket.emit('playCard', this.cards);
         }
-
-        if (this.cards.length == 3){
+        else if (this.cards.length == 3){
           const index = this.cards.indexOf(card);
           if (index > -1) {
             this.cards.splice(index, 1);
           }
+          
           console.log("Discarding " + card);
           socket.emit('passToChancellor', this.cards);
-          this.hand = false;
         }
+        this.hand = false;
+        this.chancellor = false;
+        this.president = false;
         this.cards = []
+      },
+
+      vetoChancellor(){
+        this.chancellor = false;
+        this.hand = false;
+        socket.emit('addVeto');
+      },
+
+      vetoPresident(decision){
+        console.log(decision);
+        if (decision == 'y') {
+          socket.emit('addVeto');
+        }
+        if (decision == 'n') {
+          socket.emit('failedVeto');
+        }
+        this.president = false;
       },
     }
 }

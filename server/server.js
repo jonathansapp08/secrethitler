@@ -67,7 +67,6 @@ io.on('connection', function (socket) {
         io.emit('receive', newText);
     });
 
-
 // FOR THE GAME
     socket.on('hostStart', (players) => {
         io.in(roomID).emit('showBoard');
@@ -80,6 +79,7 @@ io.on('connection', function (socket) {
         rooms[roomID]['chancellor'] = []
         rooms[roomID]['liberal'] = 0
         rooms[roomID]['fascist'] = 0
+        rooms[roomID]['veto'] = 0
 
 
         for ( player in rooms[roomID]['players']){
@@ -88,7 +88,6 @@ io.on('connection', function (socket) {
 
         secret(roomID, players);
     });
-
 
      // Vote yes or no
      socket.on('receiveVote', (vote) => {      
@@ -111,7 +110,7 @@ io.on('connection', function (socket) {
             if (yes > no) {
                 io.in(roomID).emit('receive',"Vote Passes");
                 // If >= 3 fascist cards and Chancellor is Hitler, end game
-                if (rooms[roomID]['liberal'] >= 3) {
+                if (rooms[roomID]['fascist'] >= 3) {
                     for (player in rooms[roomID]['roles']){
                         if (rooms[roomID]['roles'][player] == 'Hitler' && player == rooms[roomID]['chancellor'][0]){
                             console.log("GG")
@@ -124,12 +123,6 @@ io.on('connection', function (socket) {
                 rooms[roomID]['failCounter'] = 0;
                 var hand = drawCards(roomID, 3)
                 io.to(rooms[roomID]['turnOrder'][0]).emit('receiveCards', hand);
-                
-
-
-                // ADD VETO POWER IF 5 FASCIST CARDS PLAYED 
-
-
             }
             // Else add to fail counter and end turn
             else {
@@ -159,8 +152,35 @@ io.on('connection', function (socket) {
         }
     });
 
+    socket.on('addVeto', () => {
+        rooms[roomID]['veto'] += 1;
 
+        if (rooms[roomID]['veto'] == 1) {
+            io.in(roomID).emit('receive', 'Veto was proposed');
+            io.to(rooms[roomID]['turnOrder'][0]).emit('presidentVeto');
+        }
+        
+        if (rooms[roomID]['veto'] == 2) {
+            io.in(roomID).emit('receive', 'Veto was successful');
+            rooms[roomID]['chancellor'] = []
+            endTurn(roomID);
+        }
+    });
 
+    socket.on('failedVeto', () => {
+        io.in(roomID).emit('receive', 'Veto unsuccessful');
+
+        for (player in rooms[roomID]['players']){
+            var chancellor = []
+            chancellor.push(player);
+            if (chancellor[0] == rooms[roomID]['chancellor'][0]) {
+                io.in(roomID).emit('receive', 'Veto was declined');
+                io.in(rooms[roomID]['players'][player]).emit('toggleHand');
+                break
+            }
+            chancellor = []
+        }
+    });
 
     socket.on('passToChancellor', (hand) => {
         for (player in rooms[roomID]['players']){
@@ -168,13 +188,15 @@ io.on('connection', function (socket) {
             chancellor.push(player);
             if (chancellor[0] == rooms[roomID]['chancellor'][0]) {
                 io.to(rooms[roomID]['players'][player]).emit('receiveCards', hand);
+                // Add veto power to chancellor if 5 fascist cards played
+                if (rooms[roomID]['fascist'] == 5){
+                    io.to(rooms[roomID]['players'][player]).emit('chancellorVeto');
+                }
                 break
             }
             chancellor = []
         }
     });
-
-
 
     socket.on('playCard', (card) => {
         if (card == 'Liberal'){
@@ -197,9 +219,6 @@ io.on('connection', function (socket) {
             // endGame()
         }
     });
-
-
-
 
     socket.on('receivePick', (pick) => { 
         io.in(roomID).emit('receive',"Should " + pick + " become the chancellor?")
@@ -279,6 +298,7 @@ function endTurn(roomID){
     rooms[roomID]['turnOrder'].shift();
     rooms[roomID]['turnOrder'].push(first);
     
+    rooms[roomID]['veto'] = 0;
     // Start next turn
     assignChancellor(roomID);
 }
@@ -307,10 +327,6 @@ function drawCards(roomID, amount){
 
 
 // TODO
-// 8. If 5 fascist cards chancellor can request veto
-//     1. If president agrees, break
-
-
 // 10. Did the liberal board get full?
 //     1. Yes end game
 //     2. No continue
