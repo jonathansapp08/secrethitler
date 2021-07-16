@@ -5,6 +5,11 @@
     <button v-show="start" @click="hostStart()">Start Game</button>
   </div>
 
+  <div v-show="restart" class="restart">
+    <button v-show="restart" @click="hostRestart()">Restart Game</button>
+  </div>
+
+
   <div v-show="board" class="board">
     <img src="../assets/liberalboard.png" alt="Girl in a jacket" width="470" height="600">
     <img src="../assets/fascistboard78.png" alt="Girl in a jacket" width="470" height="600">
@@ -29,6 +34,7 @@ export default {
             host: false,
             players: null,
             start: false,
+            restart: false,
             board: false,
             message: "Waiting for more players",
             liberal: null,
@@ -66,14 +72,31 @@ export default {
       socket.on('addLiberal', (liberalCount) => {
         this.liberal = liberalCount;
         if (this.liberal == 5){
-          this.waiting = true;
-          this.start = true;
-          this.board = false;
+          this.waiting = false;
+          this.start = false;
+          this.board = true;
+          this.restart = true;
         }
       });
 
       socket.on('addFascist', (fascistCount) => {
         this.fascist = fascistCount;
+        if (this.fascist == 1){
+          this.waiting = false;
+          this.start = false;
+          this.board = true;
+          this.restart = true;
+
+
+          console.log("Restarting");
+
+        }
+      });
+
+      socket.on('restartGame', () => {
+        console.log("Restarting");
+        this.message=null;
+        this.restart=true;
       });
 
     },
@@ -82,6 +105,13 @@ export default {
         console.log("Beginning Game!");
         socket.emit('hostStart', this.players);
       },
+      hostRestart(){
+        console.log("Restarting Game!");
+        this.restart=false;
+        this.liberal=null;
+        this.fascist=null;
+        socket.emit('hostStart', this.players);
+      }
     }
 }
 </script>

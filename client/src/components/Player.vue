@@ -91,10 +91,18 @@ export default {
         else if (this.hand == true){
           this.hand = false;
         }
-
-
       });
-      
+
+      socket.on('endGame', () => {
+        console.log("Ending Game");
+        this.vote=false;
+        this.hand=false;
+        this.cards=[];
+        this.chancellor=false;
+        this.president=false;
+        this.picking=false;
+      });
+
     },
     methods: {
       pick(username){

@@ -113,7 +113,8 @@ io.on('connection', function (socket) {
                 if (rooms[roomID]['fascist'] >= 3) {
                     for (player in rooms[roomID]['roles']){
                         if (rooms[roomID]['roles'][player] == 'Hitler' && player == rooms[roomID]['chancellor'][0]){
-                            console.log("GG")
+                            io.in(roomID).emit('receive', rooms[roomID]['chancellor'][0] + " was Hitler");
+                            io.in(roomID).emit('restartGame')
                             // endGame()
                             break
                         }
@@ -213,10 +214,14 @@ io.on('connection', function (socket) {
         }
 
         if (rooms[roomID]['liberal'] == 5){
+            io.in(roomID).emit('receive', '5 liberal cards were played');
+            socket.emit('endGame')
             // endGame()
         }
-        if (rooms[roomID]['fascist'] == 6){
-            // endGame()
+        if (rooms[roomID]['fascist'] == 1){
+            io.in(roomID).emit('receive', '6 fascist cards were played');
+            // io.in(roomID).emit('resetGame');
+            endGame(roomID)
         }
     });
 
@@ -226,6 +231,11 @@ io.on('connection', function (socket) {
         io.in(roomID).emit('showVote');
         rooms[roomID]['chancellor'].push(pick);
     });
+
+
+
+
+
 
 });
 
@@ -285,6 +295,8 @@ function assignRoles(players){
             io.to(players[key]).emit('receive', 'The "bad guys" are ' + badGuys);
         }
     }
+
+    console.log(rooms[roomID]['roles']);
 }
 
 function assignChancellor(roomID){
@@ -301,6 +313,21 @@ function endTurn(roomID){
     rooms[roomID]['veto'] = 0;
     // Start next turn
     assignChancellor(roomID);
+}
+
+function endGame(roomID){
+    console.log("ending game");
+    console.log(roomID);
+
+    rooms[roomID]['roles'] = {}
+    rooms[roomID]['vote'] = {}
+    rooms[roomID]['failCounter'] = 0
+    rooms[roomID]['turnOrder'] = []
+    rooms[roomID]['cards'] = []
+    rooms[roomID]['chancellor'] = []
+    rooms[roomID]['liberal'] = 0
+    rooms[roomID]['fascist'] = 0
+    rooms[roomID]['veto'] = 0
 }
 
 
