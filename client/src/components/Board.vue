@@ -86,17 +86,16 @@ export default {
           this.start = false;
           this.board = true;
           this.restart = true;
-
-
-          console.log("Restarting");
-
         }
       });
 
       socket.on('restartGame', () => {
-        console.log("Restarting");
         this.message=null;
         this.restart=true;
+      });
+
+      socket.on('hideRestart', () => {
+        this.restart=false;
       });
 
     },

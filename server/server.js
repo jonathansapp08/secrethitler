@@ -69,6 +69,7 @@ io.on('connection', function (socket) {
 
 // FOR THE GAME
     socket.on('hostStart', (players) => {
+        io.in(roomID).emit('hideRestart');
         io.in(roomID).emit('showBoard');
 
         rooms[roomID]['roles'] = {}
