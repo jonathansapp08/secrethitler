@@ -219,7 +219,7 @@ io.on('connection', function (socket) {
             socket.emit('endGame')
             // endGame()
         }
-        if (rooms[roomID]['fascist'] == 1){
+        if (rooms[roomID]['fascist'] == 6){
             io.in(roomID).emit('receive', '6 fascist cards were played');
             // io.in(roomID).emit('resetGame');
             endGame(roomID)
@@ -351,13 +351,7 @@ function drawCards(roomID, amount){
     return hand
 }
 
-
-
-
 // TODO
-// 10. Did the liberal board get full?
-//     1. Yes end game
-//     2. No continue
 // 11. Did fascist board get full?
 //     1. Yes end game
 //     2. No check for executive power
