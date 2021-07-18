@@ -68,8 +68,8 @@ io.on('connection', function (socket) {
 // FOR THE GAME
 
 fiveSix = [nothing, nothing, examine, initiateKill, initiateKill, endGame]
-sevenEight = [nothing, investigate, examine, initiateKill, initiateKill, endGame]
-nineTen = [investigate, investigate, examine, initiateKill, initiateKill, endGame]
+sevenEight = [nothing, initiateInvestigate, examine, initiateKill, initiateKill, endGame]
+nineTen = [initiateInvestigate, initiateInvestigate, examine, initiateKill, initiateKill, endGame]
 
 
 
@@ -93,10 +93,11 @@ nineTen = [investigate, investigate, examine, initiateKill, initiateKill, endGam
         rooms[roomID]['liberal'] = 0
         rooms[roomID]['fascist'] = 0
         rooms[roomID]['veto'] = 0
+        rooms[roomID]['living'] = Object.assign({}, rooms[roomID]['players']);
 
-        for ( player in rooms[roomID]['players']){
-            rooms[roomID]['living'].push(rooms[roomID]['players'][player]);
-        }
+        // for ( player in rooms[roomID]['players']){
+        //     rooms[roomID]['living'].push(player);
+        // }
         
 
         if (players.length > 8){
@@ -241,7 +242,6 @@ nineTen = [investigate, investigate, examine, initiateKill, initiateKill, endGam
 
             // Executive Powers
             rooms[roomID]['powers'][rooms[roomID]['fascist'] - 1](roomID);
-            endTurn(roomID);
         }
 
         if (rooms[roomID]['liberal'] == 5){
@@ -263,7 +263,11 @@ nineTen = [investigate, investigate, examine, initiateKill, initiateKill, endGam
         rooms[roomID]['chancellor'].push(pick);
     });
 
-
+    
+    socket.on('investigatePlayer', (username) => {
+        io.in(roomID).emit('receive', rooms[roomID]['turnOrder'][0] + " just investigated " + username);
+        investigate(roomID, username);
+    });
 
     socket.on('killPlayer', (username) => {
         io.in(roomID).emit('receive', rooms[roomID]['turnOrder'][0] + " just killed " + username);
@@ -329,8 +333,6 @@ function assignRoles(players){
             io.to(players[key]).emit('receive', 'The "bad guys" are ' + badGuys);
         }
     }
-
-    console.log(rooms[roomID]['roles']);
 }
 
 function assignChancellor(roomID){
@@ -340,47 +342,66 @@ function assignChancellor(roomID){
 
 
 
-
+// Executive Powers
 function nothing(){
     console.log("Nothing");
+    endTurn(roomID);
 }
-
-
-function investigate(roomID){
-    io.in(roomID).emit('receive',rooms[roomID]['turnOrder'][0] + ' is investigating a role');
-    io.to(rooms[roomID]['turnOrder'][0]).emit('allowInvestigate');
-}
-
 
 function examine(roomID){
     io.in(roomID).emit('receive',rooms[roomID]['turnOrder'][0] + ' is examining the top three cards');
     let hand = peakCards(roomID, 3)
     io.to(rooms[roomID]['turnOrder'][0]).emit('receive', 'The tops 3 cards are: ' + hand);
+    endTurn(roomID);
+}
+
+function initiateInvestigate(roomID){
+    io.in(roomID).emit('receive',rooms[roomID]['turnOrder'][0] + ' is investigating a role');
+    io.to(rooms[roomID]['turnOrder'][0]).emit('allowInvestigate');
+}
+
+function investigate(roomID, username){
+
+// YOU ARE HERE
+
+    var role = rooms[roomID]['roles'][username]
+    console.log(role);
+
+    if (role == "Hitler"){
+        role = 'Fascist'
+    }
+
+    io.to(rooms[roomID]['turnOrder'][0]).emit('receive', username + ' is a  ' + role);
+    endTurn(roomID);
 }
 
 function initiateKill(roomID){
-    console.log("HIIIIIIIII");
     io.in(roomID).emit('receive','User ' + rooms[roomID]['turnOrder'][0] + ' is killing a player');
     io.to(rooms[roomID]['turnOrder'][0]).emit('allowKill');
-    
 }
 
 function kill(roomID, username){
-    // Removing player from turn order
-    var socketID = rooms[roomID]['living'][username];
+    // Given username what is socketID
+    var socketID = null;
+    for ( player in rooms[roomID]['players']){
+        if (player == username){
+            socketID = rooms[roomID]['players'][player]
+            break
+        }    
+    }
+    // Remove socketID from turn order
     var index = rooms[roomID]['turnOrder'].indexOf(socketID);
     if (index >= 0) {
         rooms[roomID]['turnOrder'].splice( index, 1 );
     }
-    // Removing player from list of living
+    // Delete username from living
     delete rooms[roomID]['living'][username]
+    // Removing player from list of living
     io.in(roomID).emit('listPlayer', rooms[roomID]['living']);
+    endTurn(roomID);
 }
 
-
-
-
-
+// Endings
 function endTurn(roomID){
     var first = []
     first = rooms[roomID]['turnOrder'][0];
@@ -408,6 +429,7 @@ function endGame(roomID){
 }
 
 
+// Card
 var policyTiles = ["Liberal", "Liberal", "Liberal", "Liberal", "Liberal", "Liberal", 
 "Fascist", "Fascist", "Fascist", "Fascist", "Fascist", "Fascist", "Fascist", "Fascist", "Fascist", "Fascist", "Fascist", 
 ]
@@ -436,16 +458,11 @@ function drawCards(roomID, amount){
         rooms[roomID]['cards'] = policyTiles.slice();
         shuffle(rooms[roomID]['cards']);
     }
-    console.log(rooms[roomID]['cards']);
-
     // Drawing hand
     var hand = []
     while (hand.length < amount){
         hand = rooms[roomID]['cards'].splice(0, amount);
     }    
-    console.log(rooms[roomID]['cards']);
-
-
     return hand
 }
 
