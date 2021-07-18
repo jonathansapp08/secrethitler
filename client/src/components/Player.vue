@@ -54,6 +54,7 @@ export default {
             chancellor: false,
             president: false,
             picking: false,
+            investigate: false,
             killing: false
         }
     },
@@ -73,6 +74,10 @@ export default {
       socket.on('allowKill', () =>{
         console.log('Allowing kills');
         this.killing = true
+      });
+
+      socket.on('allowInvestigate', () =>{
+        this.investigate = true
       });
 
       socket.on('receiveCards', (cards) =>{
@@ -112,20 +117,21 @@ export default {
     },
     methods: {
       pick(username){
-
-        if (this.killing == true) {
-          socket.emit('killPlayer', username);
-          this.killing == false;
+        if (this.investigate == true && username != this.user) {
+          this.investigate = false;
+          socket.emit('investigatePlayer', username);
         }
-
-        if (this.picking == true && username != this.user){
+        else if (this.killing == true && username != this.user) {
+          socket.emit('killPlayer', username);
+          this.killing = false;
+        }
+        else if (this.picking == true && username != this.user){
           socket.emit('receivePick', username);
           this.picking = false;
         }
         else {
           console.log("Not time to pick and/or you can't pick yourself!");
         }
-
       },
       
       submitVote(vote){

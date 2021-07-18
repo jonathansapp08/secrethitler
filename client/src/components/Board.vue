@@ -81,7 +81,7 @@ export default {
 
       socket.on('addFascist', (fascistCount) => {
         this.fascist = fascistCount;
-        if (this.fascist == 1){
+        if (this.fascist == 6){
           this.waiting = false;
           this.start = false;
           this.board = true;
