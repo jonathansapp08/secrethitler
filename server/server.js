@@ -309,7 +309,6 @@ function assignRoles(players){
     if (Object.keys(players).length == 10){
         var roles=['Liberal', 'Liberal', 'Liberal', 'Liberal', 'Liberal', 'Liberal', 'Fascist', 'Fascist', 'Fascist', 'Hitler'];
     }
-
     
     const badGuys = [];
 
@@ -317,17 +316,23 @@ function assignRoles(players){
         var randomAssign = roles[Math.floor(Math.random() * roles.length)];
 
         io.to(players[key]).emit('receive', 'You are ' + randomAssign);
-        // Get bad guys
-        if (randomAssign == 'Fascist' || randomAssign == 'Hitler'){
-            badGuys.push(key)
+        
+        // Don't inform Hitler if 7-10
+        if (Object.keys(players).length >= 7){
+            if (randomAssign == 'Fascist'){
+                badGuys.push(key)
+            }
+        }
+        else{
+            if (randomAssign == 'Fascist' || randomAssign == 'Hitler'){
+                badGuys.push(key)
+            }
         }
 
         rooms[roomID]['roles'][key] = randomAssign;
-
-
-        roles.indexOf(randomAssign) !== -1 && roles.splice(roles.indexOf(randomAssign), 1)
+        roles.indexOf(randomAssign) !== -1 && roles.splice(roles.indexOf(randomAssign), 1)    
     } 
-    //Let bad guys know who other bad guyas are
+    //Let bad guys know who other bad guys are
     for (let key in players){
         if (badGuys.includes(key)){
             io.to(players[key]).emit('receive', 'The "bad guys" are ' + badGuys);
@@ -473,10 +478,7 @@ function peakCards(roomID, amount){
 }
 
 // TODO
-// 11. Did fascist board get full?
-//     1. Yes end game
-//     2. No check for executive power
-//     3. Enact executive power
+// Fix Hitler knowing vs not knowing
 
 
 http.listen(3000, function () {
