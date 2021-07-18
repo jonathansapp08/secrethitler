@@ -1,7 +1,5 @@
 const server = require('express')();
 const http = require('http').createServer(server);
-const { fail } = require('assert');
-const { Console } = require('console');
 const randomstring = require('randomstring');
 const io = require('socket.io')(http, {
     cors: {
@@ -68,6 +66,20 @@ io.on('connection', function (socket) {
     });
 
 // FOR THE GAME
+
+fiveSix = [nothing, nothing, examine, initiateKill, initiateKill, endGame]
+sevenEight = [nothing, investigate, examine, initiateKill, initiateKill, endGame]
+nineTen = [investigate, investigate, examine, initiateKill, initiateKill, endGame]
+
+
+
+
+
+
+
+
+
+
     socket.on('hostStart', (players) => {
         io.in(roomID).emit('hideRestart');
         io.in(roomID).emit('showBoard');
@@ -81,6 +93,21 @@ io.on('connection', function (socket) {
         rooms[roomID]['liberal'] = 0
         rooms[roomID]['fascist'] = 0
         rooms[roomID]['veto'] = 0
+
+        for ( player in rooms[roomID]['players']){
+            rooms[roomID]['living'].push(rooms[roomID]['players'][player]);
+        }
+        
+
+        if (players.length > 8){
+            rooms[roomID]['powers'] = nineTen;
+        }
+        else if (players.length > 6){
+            rooms[roomID]['powers'] = sevenEight;
+        }
+        else {
+            rooms[roomID]['powers'] = fiveSix;
+        }
 
 
         for ( player in rooms[roomID]['players']){
@@ -211,6 +238,9 @@ io.on('connection', function (socket) {
             rooms[roomID]['fascist'] += 1
             rooms[roomID]['chancellor'] = []
             io.in(roomID).emit('addFascist', rooms[roomID]['fascist']);
+
+            // Executive Powers
+            rooms[roomID]['powers'][rooms[roomID]['fascist'] - 1](roomID);
             endTurn(roomID);
         }
 
@@ -235,7 +265,10 @@ io.on('connection', function (socket) {
 
 
 
-
+    socket.on('killPlayer', (username) => {
+        io.in(roomID).emit('receive', rooms[roomID]['turnOrder'][0] + " just killed " + username);
+        kill(roomID, username);
+    });
 
 
 });
@@ -305,6 +338,49 @@ function assignChancellor(roomID){
     io.to(rooms[roomID]['turnOrder'][0]).emit('allowPick');
 }
 
+
+
+
+function nothing(){
+    console.log("Nothing");
+}
+
+
+function investigate(roomID){
+    io.in(roomID).emit('receive',rooms[roomID]['turnOrder'][0] + ' is investigating a role');
+    io.to(rooms[roomID]['turnOrder'][0]).emit('allowInvestigate');
+}
+
+
+function examine(roomID){
+    io.in(roomID).emit('receive',rooms[roomID]['turnOrder'][0] + ' is examining the top three cards');
+    let hand = peakCards(roomID, 3)
+    io.to(rooms[roomID]['turnOrder'][0]).emit('receive', 'The tops 3 cards are: ' + hand);
+}
+
+function initiateKill(roomID){
+    console.log("HIIIIIIIII");
+    io.in(roomID).emit('receive','User ' + rooms[roomID]['turnOrder'][0] + ' is killing a player');
+    io.to(rooms[roomID]['turnOrder'][0]).emit('allowKill');
+    
+}
+
+function kill(roomID, username){
+    // Removing player from turn order
+    var socketID = rooms[roomID]['living'][username];
+    var index = rooms[roomID]['turnOrder'].indexOf(socketID);
+    if (index >= 0) {
+        rooms[roomID]['turnOrder'].splice( index, 1 );
+    }
+    // Removing player from list of living
+    delete rooms[roomID]['living'][username]
+    io.in(roomID).emit('listPlayer', rooms[roomID]['living']);
+}
+
+
+
+
+
 function endTurn(roomID){
     var first = []
     first = rooms[roomID]['turnOrder'][0];
@@ -336,18 +412,46 @@ var policyTiles = ["Liberal", "Liberal", "Liberal", "Liberal", "Liberal", "Liber
 "Fascist", "Fascist", "Fascist", "Fascist", "Fascist", "Fascist", "Fascist", "Fascist", "Fascist", "Fascist", "Fascist", 
 ]
 
+function shuffle(deck) {
+    var currentIndex = deck.length,  randomIndex;
+  
+    // While there remain elements to shuffle...
+    while (0 !== currentIndex) {
+  
+      // Pick a remaining element...
+      randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex--;
+  
+      // And swap it with the current element.
+      [deck[currentIndex], deck[randomIndex]] = [
+        deck[randomIndex], deck[currentIndex]];
+    }
+  
+    return deck;
+  }
+
 function drawCards(roomID, amount){
     // Reset deck if not enough cards
     if (rooms[roomID]['cards'].length < amount){
         rooms[roomID]['cards'] = policyTiles.slice();
+        shuffle(rooms[roomID]['cards']);
     }
+    console.log(rooms[roomID]['cards']);
+
     // Drawing hand
     var hand = []
     while (hand.length < amount){
-        var randomTile = rooms[roomID]['cards'][Math.floor(Math.random() * rooms[roomID]['cards'].length)];
-        hand.push(randomTile);
-        rooms[roomID]['cards'].indexOf(randomTile) !== -1 && rooms[roomID]['cards'].splice(rooms[roomID]['cards'].indexOf(randomTile), 1);
+        hand = rooms[roomID]['cards'].splice(0, amount);
     }    
+    console.log(rooms[roomID]['cards']);
+
+
+    return hand
+}
+
+function peakCards(roomID, amount){
+    var hand = []
+    hand = rooms[roomID]['cards'].slice(0, amount);
     return hand
 }
 
