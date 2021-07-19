@@ -3,8 +3,10 @@
 
 <div v-show="lobby" class="lobby">
 
+    <img src="./assets/banner.png" alt="Banner" class="banner">
+
     <div class="newRoom">
-        <h4>Create a New Game</h4>
+        <h4>Create a new game</h4>
         <form onsubmit="return false">                        
             <input v-model="username" type="text" placeholder="Enter Username">
             <!-- <input v-model="playerNum" type="number" placeholder="Enter number of players"> -->
@@ -13,7 +15,7 @@
     </div>
     
     <div class="joinRoom">
-        <h4>Join an existing Game</h4>
+        <h4>Or join an existing game</h4>
         <form onsubmit="return false">                        
             <input v-model="username" type="text" placeholder="Enter Username">
             <input v-model="roomID" type="text" placeholder="room ID here">
@@ -113,4 +115,30 @@ export default {
     overflow-y: auto;
     word-break: break-word;
 }
+
+
+
+
+
+
+
+
+
+.lobby{
+    height: 100vh;
+    background-color: #f2654b;
+
+    
+    font-size: 2.5vw;
+    font-family: Arial;
+    color: white;
+}
+
+.banner{
+    width: 50%;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
 </style>

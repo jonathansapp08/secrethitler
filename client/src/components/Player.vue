@@ -1,40 +1,47 @@
 <template>
-<div class="columns">
+<div>
+  <div class="columns">
+    <div v-for="(id, username, index) in players" :key="index" class="column">
+    <div @click="pick(username)" class="card" style="text-align: center;">
+      <div class="card-content">
+        <div class="media">
+          <div class="media-content"> 
+            <p class="title is-4">{{username}}</p>
+          </div>
+        </div>
+      </div>
+      <div class="card-image">
+        <figure class="image is-128x128">
+          <img src="https://bulma.io/images/placeholders/128x128.png" alt="Placeholder image">
+        </figure>
+      </div>
+    </div>
+    </div>
+  </div>
 
-<div v-for="(id, username, index) in players" :key="index" class="column">
-<div @click="pick(username)" class="card" style="text-align: center;">
-  <div class="card-content">
-    <div class="media">
-      <div class="media-content"> 
-        <p class="title is-4">{{username}}</p>
+  <div v-show="vote" class="vote">
+      <h1>Vote Now</h1>
+      <img @click="submitVote('y')" src="../assets/ja.png" alt="">
+      <img @click="submitVote('n')" src="../assets/nein.png" alt="">
+  </div>
+
+  <div v-show="hand" class="hand">
+    <h1>Discard a Policy</h1>
+    <div class="cards">
+      <div v-for="(card) in cards" :key="card">
+        <img @click="discardCard(card)" :src="getPic(card)" >
       </div>
     </div>
   </div>
-  <div class="card-image">
-    <figure class="image is-128x128">
-      <img src="https://bulma.io/images/placeholders/128x128.png" alt="Placeholder image">
-    </figure>
+
+  <div v-show="chancellor" class="veto">
+      <button @click="vetoChancellor()">Veto</button>
   </div>
-</div>
-</div>
 
-<div v-show="vote" class="vote">
-    <button @click="submitVote('y')">Yes</button>
-    <button @click="submitVote('n')">No</button>
-</div>
-
-<div v-show="hand" v-for="(card) in cards" :key="card" class="hand">
-    <button @click="discardCard(card)">{{card}}</button>
-</div>
-
-<div v-show="chancellor" class="veto">
-    <button @click="vetoChancellor()">Veto</button>
-</div>
-
-<div v-show="president" class="veto">
-    <button @click="vetoPresident('y')">Yes</button>
-    <button @click="vetoPresident('n')">No</button>
-</div>
+  <div v-show="president" class="vote">
+      <img @click="submitVote('y')" src="../assets/ja.png" alt="">
+      <img @click="submitVote('n')" src="../assets/nein.png" alt="">
+  </div>
 
 </div>
 </template>
@@ -116,6 +123,10 @@ export default {
 
     },
     methods: {
+      getPic(card) {
+        return require ('../assets/' + card + '.png');
+      },
+
       pick(username){
         if (this.investigate == true && username != this.user) {
           this.investigate = false;
@@ -184,3 +195,43 @@ export default {
     }
 }
 </script>
+
+<style scoped>
+.vote{
+  width: 100vw;
+  text-align: center;
+}
+
+.vote h1{
+  font-size: 3vw;
+}
+
+.vote img{
+  padding-left: .5vw;
+  padding-right: .5vw; 
+}
+
+
+
+
+
+.hand{
+  width: 100vw;
+  text-align: center;
+  display: grid;
+  justify-content: space-evenly;
+}
+
+.hand h1{
+  font-size: 2vw;
+}
+
+.hand img{
+  padding-left: .5vw;
+  padding-right: .5vw; 
+}
+
+.cards{
+  display: flex;
+}
+</style>
