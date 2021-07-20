@@ -112,8 +112,8 @@ export default {
 }
 
 #chat {
-    overflow-y: auto;
-    word-break: break-word;
+    /* overflow-y: auto;
+    word-break: break-word; */
 }
 
 

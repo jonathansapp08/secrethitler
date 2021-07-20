@@ -1,6 +1,6 @@
 <template>
     <div id="container">
-        <div id="output">
+        <div id="output" v-chat-scroll>
             <!-- <h1>Messages</h1> -->
             <p v-for="(text, index) in textOutput" :key="index">{{text}}</p>
         </div>
@@ -43,33 +43,43 @@ export default {
 </script>
 
 <style scoped>
-    #container {
-        text-align: left;
-        display: flex;
-        flex-direction: column;
-        margin-left: 1vw;
-
-    }
     h1 {
         text-align: center;        
     }
 
-    #input {
-        position: fixed;
-        margin-top: 40vh;
+    #container{
+        height:100%;
+        position: relative;
+        text-align: left;
+        display: flex;
+        flex-direction: column;
+        margin-left: 1vw;
+    }
+
+    #output{
+        height: 95%;
+        overflow-y: scroll;
+        word-break: break-word;
+    }
+
+    ::-webkit-scrollbar {
+    background-color: transparent;
+    }
+
+    #input{
+        width:100%;
+        position: sticky;
+        bottom: 0;
     }
     input[type=text] {
-        height: 20px;
-        width:  25vw;
-        padding: 11px;
+        width:80%;
         border: 2px solid black;
         background-color: white;
         color: black;
         padding-left: 1em;
     }
     input[type=submit]{
-        height: 25px;
-        width: 5vw;
+        width:20%;
         background-color: #608cb3;
         color: black;
         border: 1px solid black;
@@ -79,20 +89,5 @@ export default {
     }
     input[type=submit]:hover{
         background-color: #e36247;
-    }
-
-    @media (max-width: 1000px) {
-        #input {
-            margin-top: 43vh;
-        }
-        #output {
-            margin-right: 10vw;
-        }
-        input[type=text] {
-            width: 20vw;
-        }
-        input[type=submit] {
-            min-width: 10vw;
-        }
     }
 </style>
