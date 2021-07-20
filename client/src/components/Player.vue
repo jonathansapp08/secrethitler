@@ -11,8 +11,8 @@
         </div>
       </div>
       <div class="card-image">
-        <figure class="image is-128x128">
-          <img src="https://bulma.io/images/placeholders/128x128.png" alt="Placeholder image">
+        <figure class="image is-128x128 logo">
+          <img @click="toggleLogo(username)" :src="getLogo(username)" alt="Placeholder image" style="width: 100%">
         </figure>
       </div>
     </div>
@@ -29,7 +29,7 @@
     <h1>Discard a Policy</h1>
     <div class="cards">
       <div v-for="(card) in cards" :key="card">
-        <img @click="discardCard(card)" :src="getPic(card)" >
+        <img @click="discardCard(card)" :src="getPolicy(card)" >
       </div>
     </div>
   </div>
@@ -55,6 +55,10 @@ export default {
     data() {
         return{
             players: [],
+            playerLogos: {},
+            index: 0,
+            logos: ['liberal-logo', 'fascist-logo'],
+            currentLogoa: '../assets/liberal-logo.png',
             vote: false,
             hand: false,
             cards: [],
@@ -67,7 +71,10 @@ export default {
     },
     created () {  
       socket.on('listPlayer', (players) => {
-        this.players = players; 
+        this.players = players;
+        for (var player in this.players){
+          this.playerLogos[player] = 'liberal-logo'
+        }
       });
 
       socket.on('showVote', () => {
@@ -79,7 +86,6 @@ export default {
       });
 
       socket.on('allowKill', () =>{
-        console.log('Allowing kills');
         this.killing = true
       });
 
@@ -101,8 +107,6 @@ export default {
       });
 
       socket.on('toggleHand', () =>{
-        console.log(this.hand)
-
         if (this.hand == false){
           this.hand = true;
         }
@@ -123,9 +127,19 @@ export default {
 
     },
     methods: {
-      getPic(card) {
+      getPolicy(card) {
         return require ('../assets/' + card + '.png');
       },
+
+      getLogo(username) {
+        return require('../assets/' + this.playerLogos[username] + '.png')
+      },
+      
+      toggleLogo(username) {
+        this.index +=1 ;
+        this.playerLogos[username] = this.logos[this.index % 2]
+        return require ('../assets/' + this.playerLogos[username] + '.png');
+        },
 
       pick(username){
         if (this.investigate == true && username != this.user) {
@@ -183,7 +197,6 @@ export default {
       },
 
       vetoPresident(decision){
-        console.log(decision);
         if (decision == 'y') {
           socket.emit('addVeto');
         }
@@ -233,5 +246,10 @@ export default {
 
 .cards{
   display: flex;
+}
+
+.logo{
+  margin-left: auto;
+  margin-right: auto;
 }
 </style>

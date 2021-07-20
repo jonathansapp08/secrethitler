@@ -45,12 +45,13 @@ io.on('connection', function (socket) {
 
     socket.on('disconnect', function () {
         try {
-            for (let value in rooms[roomID]){
-                if (rooms[roomID][value] == socket.id){
+            for (let value in rooms[roomID]['players']){
+                console.log(value);
+                if (rooms[roomID]['players'][value] == socket.id){
                     io.in(roomID).emit('receive', value + ' disconnected!');
-                    delete rooms[roomID][value];
+                    delete rooms[roomID]['players'][value];
                     console.log(value + ' left room ' + roomID);
-                    io.in(roomID).emit('listPlayer', rooms[roomID]);
+                    io.in(roomID).emit('listPlayer', rooms[roomID]['players']);
                     break;
                 }
             }
