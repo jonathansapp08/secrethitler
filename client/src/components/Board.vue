@@ -14,7 +14,7 @@
     <img src="../assets/liberalboard.png" alt="Girl in a jacket" width="470" height="600">
     <img src="../assets/fascistboard78.png" alt="Girl in a jacket" width="470" height="600">
 
-    <img src="../assets/policy.png" alt="Girl in a jacket" width="75" height="600">
+    <img @mouseover="policyCount" src="../assets/policy.png" alt="Policy Pile">
 
     <p>{{liberal}}</p>
     <p>{{fascist}}</p>
@@ -38,7 +38,8 @@ export default {
             board: false,
             message: "Waiting for more players",
             liberal: null,
-            fascist: null
+            fascist: null,
+            policyCount: null
         }
     },
     created () {
@@ -110,6 +111,9 @@ export default {
         this.liberal=null;
         this.fascist=null;
         socket.emit('hostStart', this.players);
+      },
+      policyCount(){
+        this.policyCount = socket.emit('getPolicyCount');
       }
     }
 }

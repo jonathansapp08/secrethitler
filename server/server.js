@@ -275,6 +275,9 @@ nineTen = [initiateInvestigate, initiateInvestigate, examine, initiateKill, init
         kill(roomID, username);
     });
 
+    socket.on('getPolicyCount', () => {
+        return rooms[roomID]['cards'].length
+    });
 
 });
 

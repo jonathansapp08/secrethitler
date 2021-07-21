@@ -1,7 +1,6 @@
 <template>
     <div id="container">
-        <div id="output" v-chat-scroll>
-            <!-- <h1>Messages</h1> -->
+        <div id="output">
             <p v-for="(text, index) in textOutput" :key="index">{{text}}</p>
         </div>
         <div id="input">
@@ -37,6 +36,9 @@ export default {
         socket.on('receive', (text) => {
             this.textOutput.push(text);
             this.textInput = null;
+
+            var elem = document.getElementById('output');
+            elem.scrollTop = elem.scrollHeight;
         });
     }
 }
@@ -54,6 +56,7 @@ export default {
         display: flex;
         flex-direction: column;
         margin-left: 1vw;
+        margin-right: 1vw;
     }
 
     #output{
@@ -62,9 +65,9 @@ export default {
         word-break: break-word;
     }
 
-    ::-webkit-scrollbar {
+    /* ::-webkit-scrollbar {
     background-color: transparent;
-    }
+    } */
 
     #input{
         width:100%;
