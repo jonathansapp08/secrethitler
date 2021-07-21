@@ -248,6 +248,10 @@ export default {
   display: flex;
 }
 
+.card{
+  padding-bottom: 2vh;
+}
+
 .logo{
   margin-left: auto;
   margin-right: auto;
