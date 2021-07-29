@@ -281,7 +281,7 @@ function secret(roomID, players){
 }
 
 function assignRoles(players){
-    if (Object.keys(players).length == 2){
+    if (Object.keys(players).length == 5){
         var roles=['Liberal', 'Liberal', 'Liberal', 'Fascist', 'Hitler'];
     }
     if (Object.keys(players).length == 6){
