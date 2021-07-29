@@ -65,9 +65,9 @@ export default {
         word-break: break-word;
     }
 
-    /* ::-webkit-scrollbar {
+    ::-webkit-scrollbar {
     background-color: transparent;
-    } */
+    }
 
     #input{
         width:100%;

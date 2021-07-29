@@ -1,25 +1,46 @@
 <template>
 <div>
-  <div v-show="waiting" class="waiting">
+  <div v-show="board" class="board">
+    <img :src="getFascistCount()" alt="Fascist Board" style="max-width: 50vw; height: 23vh;">
+    <img :src="getLiberalCount()" alt="Liberal Board" style="max-width: 50vw; height: 23vh;">
+    <img @mouseover="policyCount()" src="../assets/policy.png" alt="Policy Pile" class="policy">
+  </div>
+
+  <div v-show="waiting" class="waiting messages">
     <p>{{message}}</p>
     <button v-show="start" @click="hostStart()">Start Game</button>
   </div>
 
-  <div v-show="restart" class="restart">
+  <div v-show="restart" class="restart messages">
     <button v-show="restart" @click="hostRestart()">Restart Game</button>
   </div>
 
 
-  <div v-show="board" class="board">
-    <img src="../assets/liberalboard.png" alt="Girl in a jacket" width="470" height="600">
-    <img src="../assets/fascistboard78.png" alt="Girl in a jacket" width="470" height="600">
 
-    <img @mouseover="policyCount()" src="../assets/policy.png" alt="Policy Pile">
 
-    <p>{{liberal}}</p>
-    <p>{{fascist}}</p>
 
-  </div>
+  
+  <!-- <div class="columns">
+     <div class="column">
+      <div v-show="board" class="board">
+        <img :src="getFascistCount()" alt="Fascist Board" style="max-width: 50vw; height: 23vh;">
+        <img :src="getLiberalCount()" alt="Liberal Board" style="max-width: 50vw; height: 23vh;">
+      </div>
+    </div>
+    <div class="column messages">
+      <div v-show="waiting" class="waiting">
+        <p>{{message}}</p>
+        <button v-show="start" @click="hostStart()">Start Game</button>
+      </div>
+
+      <div v-show="restart" class="restart">
+        <button v-show="restart" @click="hostRestart()">Restart Game</button>
+      </div>
+      <div v-show="board">
+        <img @mouseover="policyCount()" src="../assets/policy.png" alt="Policy Pile">
+      </div>
+    </div>
+  </div> -->
 </div>
 
 </template>
@@ -37,9 +58,10 @@ export default {
             restart: false,
             board: false,
             message: "Waiting for more players",
-            liberal: null,
-            fascist: null,
-            count: null
+            liberal: 0,
+            fascist: 0,
+            count: null,
+            powers: null
         }
     },
     created () {
@@ -99,6 +121,11 @@ export default {
         this.restart=false;
       });
 
+      socket.on('generatePowers', (powers) => {
+        console.log(powers);
+        this.powers=powers;
+      });
+
     },
     methods: {
       hostStart(){
@@ -108,24 +135,46 @@ export default {
       hostRestart(){
         console.log("Restarting Game!");
         this.restart=false;
-        this.liberal=null;
-        this.fascist=null;
+        this.liberal=0;
+        this.fascist=0;
         socket.emit('hostStart', this.players);
       },
       policyCount(){
         this.count = socket.emit('getPolicyCount');
         console.log(this.count);
-      }
+      },
+      getLiberalCount() {
+        return require('../assets/liberal-board/liberalboard' + this.liberal + '.png')
+      },
+      getFascistCount() {
+        var players = this.players;
+        var board = null;
+        if (players > 8){
+          board = 9
+          return require('../assets/fascist-board/fascistboard' + board + '-' + this.fascist + '.png')
+        }
+        else if (players > 6){
+          board = 7
+          return require('../assets/fascist-board/fascistboard' + board + '-' + this.fascist + '.png')
+        }
+        else {
+          board = 5
+          return require('../assets/fascist-board/fascistboard' + board + '-' + this.fascist + '.png')
+        }
+      },
     }
 }
 </script>
 
 <style scoped>
-.columns{
-  height: 45%;
+.messages{
+    font-size: 2.5vw;
+  }
+
+@media only screen and (max-width: 1542px) {
+  .policy {
+    display: none;
+  }
 }
 
-.column{
-  border: 3px solid black;
-}
 </style>

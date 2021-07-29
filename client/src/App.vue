@@ -27,7 +27,7 @@
 
 <div v-show="game" class="game">
     <div class="columns top-half" style="margin-top: 0px;">
-    <div class="column is-two-thirds">
+    <div class="column is-one-half">
         <Board />
     </div>
     <div id="chat" class="column">
