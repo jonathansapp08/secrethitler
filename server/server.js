@@ -116,7 +116,7 @@ var nineTen = [initiateInvestigate, initiateInvestigate, examine, initiateKill, 
         var no = 0;
         
         // If there are equal number of votes as there are players
-        if (Object.keys(rooms[roomID]['vote']).length == Object.keys(rooms[roomID]['players']).length){
+        if (Object.keys(rooms[roomID]['vote']).length == Object.keys(rooms[roomID]['living']).length){
             for (votes in rooms[roomID]['vote']){
                 if (rooms[roomID]['vote'][votes] == 'y'){
                     yes += 1
@@ -222,12 +222,32 @@ var nineTen = [initiateInvestigate, initiateInvestigate, examine, initiateKill, 
     socket.on('playCard', (card) => {
         if (card == 'Liberal'){
             rooms[roomID]['liberal'] += 1
+
+            // Remove card from policy tiles
+            for( var i = 0; i < policyTiles.length; i++){ 
+                if ( policyTiles[i] == 'Liberal') { 
+                    policyTiles.splice(i, 1); 
+                    break
+                }
+            }
+
             rooms[roomID]['chancellor'] = []
             io.in(roomID).emit('addLiberal', rooms[roomID]['liberal']);
             endTurn(roomID);
         }
         if (card == 'Fascist'){
             rooms[roomID]['fascist'] += 1
+
+            // Remove card from policy tiles
+            for( var i = 0; i < policyTiles.length; i++){ 
+                if ( policyTiles[i] == 'Fascist') { 
+                    policyTiles.splice(i, 1); 
+                    break
+                }
+            }
+
+
+
             rooms[roomID]['chancellor'] = []
             io.in(roomID).emit('addFascist', rooms[roomID]['fascist']);
 
@@ -252,7 +272,12 @@ var nineTen = [initiateInvestigate, initiateInvestigate, examine, initiateKill, 
     socket.on('receivePick', (pick) => { 
         io.in(roomID).emit('receive',"Should " + pick + " become the chancellor?")
         io.in(roomID).emit('receive', 'Vote yes or no');
-        io.in(roomID).emit('showVote');
+
+
+        for (player in rooms[roomID]['living']){
+            io.to(rooms[roomID]['living'][player]).emit('showVote');
+        }
+
         rooms[roomID]['chancellor'].push(pick);
     });
 
@@ -281,7 +306,7 @@ function secret(roomID, players){
 }
 
 function assignRoles(players){
-    if (Object.keys(players).length == 5){
+    if (Object.keys(players).length == 2){
         var roles=['Liberal', 'Liberal', 'Liberal', 'Fascist', 'Hitler'];
     }
     if (Object.keys(players).length == 6){
@@ -420,9 +445,11 @@ function endGame(roomID){
 
 
 // Card
-var policyTiles = ["Liberal", "Liberal", "Liberal", "Liberal", "Liberal", "Liberal", 
-"Fascist", "Fascist", "Fascist", "Fascist", "Fascist", "Fascist", "Fascist", "Fascist", "Fascist", "Fascist", "Fascist", 
-]
+// var policyTiles = ["Liberal", "Liberal", "Liberal", "Liberal", "Liberal", "Liberal",
+// "Fascist", "Fascist", "Fascist", "Fascist", "Fascist", "Fascist", "Fascist", "Fascist", "Fascist", "Fascist", "Fascist",
+// ]
+
+var policyTiles = ["Liberal", "Liberal", "Liberal", "Liberal", "Liberal", "Liberal", "Fascist"]
 
 function shuffle(deck) {
     var currentIndex = deck.length,  randomIndex;

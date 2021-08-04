@@ -74,7 +74,7 @@ export default {
 
       socket.on('playerCount', (playerCount) => {
         this.players = playerCount;
-        if (Object.keys(playerCount).length < 2){
+        if (Object.keys(playerCount).length < 1){
           this.message = "Waiting for more players";
         }
         else if (this.host == true){

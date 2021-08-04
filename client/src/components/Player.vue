@@ -15,6 +15,13 @@
           <img @click="toggleLogo(username)" :src="getLogo(username)" alt="Placeholder image" style="width: 100%">
         </figure>
       </div>
+      <div class="president">
+        <h1>President</h1>
+        <!-- <img src="../assets/president-token.png" alt="Placeholder image" style="width: 100%"> -->
+      </div>
+      <!-- <div class="chancellor">
+        <h1>chancellor</h1>
+      </div> -->
     </div>
     </div>
   </div>
@@ -256,4 +263,11 @@ export default {
   margin-left: auto;
   margin-right: auto;
 }
+
+
+.president{
+  font-size: 2vw;
+}
+
+
 </style>
