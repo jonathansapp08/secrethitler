@@ -32,12 +32,19 @@ io.on('connection', function (socket) {
         roomID = data.roomID;
         username = data.username;
 
-        rooms[roomID]['players'][username] = socket.id;
+        // Spectate if game already started
+        if (rooms[roomID]['start'] == true){
+            io.to(socket.id).emit('listPlayer', rooms[roomID]['players']);
+            io.to(socket.id).emit('showBoard');
+            io.to(socket.id).emit('receive', 'Game already started! Spectating...');
+        }
+        // Add players if game has not started
+        else {
+            rooms[roomID]['players'][username] = socket.id;
+            io.in(roomID).emit('receive', data.username + ' joined!');
+            console.log(data.username + ' joined room ' + roomID);
 
-        io.in(roomID).emit('receive', data.username + ' joined!');
-        console.log(data.username + ' joined room ' + roomID);
-
-        if (Object.keys(rooms[roomID]['players']).length < 10){
+            // Show lobby the players
             io.in(roomID).emit('listPlayer', rooms[roomID]['players']);
             io.in(roomID).emit('playerCount', rooms[roomID]['players']);
         }
@@ -76,6 +83,7 @@ var nineTen = [initiateInvestigate, initiateInvestigate, examine, initiateKill, 
         io.in(roomID).emit('hideRestart');
         io.in(roomID).emit('showBoard');
 
+        rooms[roomID]['start'] = true
         rooms[roomID]['roles'] = {}
         rooms[roomID]['vote'] = {}
         rooms[roomID]['failCounter'] = 0
@@ -117,6 +125,10 @@ var nineTen = [initiateInvestigate, initiateInvestigate, examine, initiateKill, 
         
         // If there are equal number of votes as there are players
         if (Object.keys(rooms[roomID]['vote']).length == Object.keys(rooms[roomID]['living']).length){
+            
+            // Reveal votes to everyone
+            io.in(roomID).emit('doneVoting', rooms[roomID]['vote'])
+            
             for (votes in rooms[roomID]['vote']){
                 if (rooms[roomID]['vote'][votes] == 'y'){
                     yes += 1
@@ -147,6 +159,7 @@ var nineTen = [initiateInvestigate, initiateInvestigate, examine, initiateKill, 
             }
             // Else add to fail counter and end turn
             else {
+                // Removing chancellor
                 rooms[roomID]['chancellor'] = []
                 io.in(roomID).emit('receive',"Vote Fails");
                 // If vote fails three times in a row
@@ -231,7 +244,6 @@ var nineTen = [initiateInvestigate, initiateInvestigate, examine, initiateKill, 
                 }
             }
 
-            rooms[roomID]['chancellor'] = []
             io.in(roomID).emit('addLiberal', rooms[roomID]['liberal']);
             endTurn(roomID);
         }
@@ -246,9 +258,6 @@ var nineTen = [initiateInvestigate, initiateInvestigate, examine, initiateKill, 
                 }
             }
 
-
-
-            rooms[roomID]['chancellor'] = []
             io.in(roomID).emit('addFascist', rooms[roomID]['fascist']);
 
             // Executive Powers
@@ -270,15 +279,25 @@ var nineTen = [initiateInvestigate, initiateInvestigate, examine, initiateKill, 
     });
 
     socket.on('receivePick', (pick) => { 
-        io.in(roomID).emit('receive',"Should " + pick + " become the chancellor?")
-        io.in(roomID).emit('receive', 'Vote yes or no');
-
-
-        for (player in rooms[roomID]['living']){
-            io.to(rooms[roomID]['living'][player]).emit('showVote');
+        // If pick is rooms[roomID]['chancellor'] then fails
+        if (pick == rooms[roomID]['chancellor'][0]){
+            io.to(socket.id).emit('receive', "You can't select someone who was just chancellor. Try again.");
+            io.to(rooms[roomID]['turnOrder'][0]).emit('allowPick');
+        }
+        // If new chancellor picked
+        else{
+            rooms[roomID]['chancellor'] = []
+            io.in(roomID).emit('receive',"Should " + pick + " become the chancellor?")
+            io.in(roomID).emit('receive', 'Vote yes or no');
+    
+            for (player in rooms[roomID]['living']){
+                io.to(rooms[roomID]['living'][player]).emit('showVote');
+            }
+    
+            rooms[roomID]['chancellor'].push(pick);
         }
 
-        rooms[roomID]['chancellor'].push(pick);
+
     });
 
     socket.on('investigatePlayer', (username) => {
@@ -306,7 +325,7 @@ function secret(roomID, players){
 }
 
 function assignRoles(players){
-    if (Object.keys(players).length == 2){
+    if (Object.keys(players).length == 3){
         var roles=['Liberal', 'Liberal', 'Liberal', 'Fascist', 'Hitler'];
     }
     if (Object.keys(players).length == 6){
@@ -444,12 +463,10 @@ function endGame(roomID){
 }
 
 
-// Card
-// var policyTiles = ["Liberal", "Liberal", "Liberal", "Liberal", "Liberal", "Liberal",
-// "Fascist", "Fascist", "Fascist", "Fascist", "Fascist", "Fascist", "Fascist", "Fascist", "Fascist", "Fascist", "Fascist",
-// ]
+var policyTiles = ["Liberal", "Liberal", "Liberal", "Liberal", "Liberal", "Liberal",
+"Fascist", "Fascist", "Fascist", "Fascist", "Fascist", "Fascist", "Fascist", "Fascist", "Fascist", "Fascist", "Fascist",
+]
 
-var policyTiles = ["Liberal", "Liberal", "Liberal", "Liberal", "Liberal", "Liberal", "Fascist"]
 
 function shuffle(deck) {
     var currentIndex = deck.length,  randomIndex;

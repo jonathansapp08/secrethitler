@@ -15,6 +15,11 @@
           <img @click="toggleLogo(username)" :src="getLogo(username)" alt="Placeholder image" style="width: 100%">
         </figure>
       </div>
+
+      <div v-show="results" class="results">
+        <img src="../assets/ja.png">
+      </div>
+
       <div class="president">
         <h1>President</h1>
         <!-- <img src="../assets/president-token.png" alt="Placeholder image" style="width: 100%"> -->
@@ -68,6 +73,7 @@ export default {
             currentLogoa: '../assets/liberal-logo.png',
             vote: false,
             hand: false,
+            results: true,
             cards: [],
             chancellor: false,
             president: false,
@@ -82,6 +88,11 @@ export default {
         for (var player in this.players){
           this.playerLogos[player] = 'liberal-logo'
         }
+      });
+
+      socket.on('doneVoting', (votes) => {
+        this.vote = true;
+        console.log(votes)
       });
 
       socket.on('showVote', () => {
