@@ -140,6 +140,10 @@ var nineTen = [initiateInvestigate, initiateInvestigate, examine, initiateKill, 
             // If majority yes then pass
             if (yes > no) {
                 io.in(roomID).emit('receive',"Vote Passes");
+
+                // Send chancellor info to client for icon to display under their name
+                io.in(roomID).emit('showChancellor', rooms[roomID]['chancellor'][0])
+
                 // If >= 3 fascist cards and Chancellor is Hitler, end game
                 if (rooms[roomID]['fascist'] >= 3) {
                     for (player in rooms[roomID]['roles']){
@@ -197,6 +201,7 @@ var nineTen = [initiateInvestigate, initiateInvestigate, examine, initiateKill, 
         if (rooms[roomID]['veto'] == 2) {
             io.in(roomID).emit('receive', 'Veto was successful');
             rooms[roomID]['chancellor'] = []
+            rooms[roomID]['veto'] = 0
             endTurn(roomID);
         }
     });
@@ -207,7 +212,7 @@ var nineTen = [initiateInvestigate, initiateInvestigate, examine, initiateKill, 
         for (player in rooms[roomID]['players']){
             var chancellor = []
             chancellor.push(player);
-            if (chancellor[0] == rooms[roomID]['chancellor'][0]) {
+            if (chancellor[0] == rooms[roomID]['chancellor'][5]) {
                 io.in(roomID).emit('receive', 'Veto was declined');
                 io.in(rooms[roomID]['players'][player]).emit('toggleHand');
                 break
@@ -223,7 +228,7 @@ var nineTen = [initiateInvestigate, initiateInvestigate, examine, initiateKill, 
             if (chancellor[0] == rooms[roomID]['chancellor'][0]) {
                 io.to(rooms[roomID]['players'][player]).emit('receiveCards', hand);
                 // Add veto power to chancellor if 5 fascist cards played
-                if (rooms[roomID]['fascist'] == 5){
+                if (rooms[roomID]['fascist'] == 0){
                     io.to(rooms[roomID]['players'][player]).emit('chancellorVeto');
                 }
                 break
@@ -325,7 +330,7 @@ function secret(roomID, players){
 }
 
 function assignRoles(players){
-    if (Object.keys(players).length == 3){
+    if (Object.keys(players).length == 2){
         var roles=['Liberal', 'Liberal', 'Liberal', 'Fascist', 'Hitler'];
     }
     if (Object.keys(players).length == 6){
@@ -376,6 +381,7 @@ function assignRoles(players){
 
 function assignChancellor(roomID){
     io.to(rooms[roomID]['turnOrder'][0]).emit('receive', 'Pick your chencellor');
+    io.in(roomID).emit('showPresident', rooms[roomID]['turnOrder'][0])
     io.to(rooms[roomID]['turnOrder'][0]).emit('allowPick');
 }
 
@@ -505,10 +511,6 @@ function peakCards(roomID, amount){
     hand = rooms[roomID]['cards'].slice(0, amount);
     return hand
 }
-
-// TODO
-// Fix Hitler knowing vs not knowing
-
 
 http.listen(3000, function () {
     console.log('Server started!');

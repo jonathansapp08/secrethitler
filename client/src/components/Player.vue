@@ -16,17 +16,15 @@
         </figure>
       </div>
 
-      <div v-show="results" class="results">
-        <img src="../assets/ja.png">
+      <div v-show="showVotes" id="results">
+        <img :src="getVote(id)">
       </div>
 
-      <div class="president">
-        <h1>President</h1>
-        <!-- <img src="../assets/president-token.png" alt="Placeholder image" style="width: 100%"> -->
+      <div class="power">
+        <img :src="getPresident(id)">
+        <img :src="getChancellor(username)">
       </div>
-      <!-- <div class="chancellor">
-        <h1>chancellor</h1>
-      </div> -->
+
     </div>
     </div>
   </div>
@@ -46,13 +44,15 @@
     </div>
   </div>
 
-  <div v-show="chancellor" class="veto">
+  <div v-show="chancellor" class="hand">
+      <h1>Veto?</h1>
       <button @click="vetoChancellor()">Veto</button>
   </div>
 
   <div v-show="president" class="vote">
-      <img @click="submitVote('y')" src="../assets/ja.png" alt="">
-      <img @click="submitVote('n')" src="../assets/nein.png" alt="">
+      <h1>Veto?</h1>
+      <img @click="vetoPresident('y')" src="../assets/ja.png" alt="">
+      <img @click="vetoPresident('n')" src="../assets/nein.png" alt="">
   </div>
 
 </div>
@@ -71,12 +71,15 @@ export default {
             index: 0,
             logos: ['liberal-logo', 'fascist-logo'],
             currentLogoa: '../assets/liberal-logo.png',
+            votes: {},
+            showVotes: false,
             vote: false,
             hand: false,
-            results: true,
             cards: [],
             chancellor: false,
             president: false,
+            showPresident: null,
+            showChancellor: null,
             picking: false,
             investigate: false,
             killing: false
@@ -91,10 +94,22 @@ export default {
       });
 
       socket.on('doneVoting', (votes) => {
-        this.vote = true;
-        console.log(votes)
+        this.votes = votes
+        this.showVotes = true
+        setTimeout(() => this.showVotes = false, 3000)
       });
 
+      // Get president from server
+      socket.on('showPresident', (president) => {
+        this.showPresident = president; 
+      });
+
+      // Get chancellor from server
+      socket.on('showChancellor', (chancellor) => {
+        this.showChancellor = chancellor; 
+      });
+
+      // Show votes to all players
       socket.on('showVote', () => {
         this.vote = true; 
       });
@@ -112,7 +127,7 @@ export default {
       });
 
       socket.on('receiveCards', (cards) =>{
-        this.hand = true
+        setTimeout(() => this.hand = true, 3000)
         this.cards = cards
       });
 
@@ -142,7 +157,6 @@ export default {
         this.president=false;
         this.picking=false;
       });
-
     },
     methods: {
       getPolicy(card) {
@@ -182,6 +196,33 @@ export default {
         this.vote = false;
       },
 
+      getVote(id){        
+        if (this.votes[id] == 'y'){
+          return require ('../assets/ja.png');
+        }
+        else if (this.votes[id] == 'n'){
+          return require ('../assets/nein.png');
+        }
+      },
+
+      getPresident(id){   
+        if (id == this.showPresident){
+          return require ('../assets/president-token.png');
+        }
+        else{
+          console.log('no power')
+        }
+      },
+
+      getChancellor(username){   
+        if (username == this.showChancellor){
+          return require ('../assets/chancellor-token.png');
+        }
+        else{
+          console.log('no power')
+        }
+      },
+
       discardCard(card){
         console.log("Cards before discard " + this.cards);
 
@@ -216,9 +257,10 @@ export default {
 
       vetoPresident(decision){
         if (decision == 'y') {
+          this.cards = [];
           socket.emit('addVeto');
         }
-        if (decision == 'n') {
+        else if (decision == 'n') {
           socket.emit('failedVeto');
         }
         this.president = false;
@@ -279,6 +321,5 @@ export default {
 .president{
   font-size: 2vw;
 }
-
 
 </style>

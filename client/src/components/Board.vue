@@ -122,7 +122,6 @@ export default {
       });
 
       socket.on('generatePowers', (powers) => {
-        console.log(powers);
         this.powers=powers;
       });
 
@@ -141,7 +140,6 @@ export default {
       },
       policyCount(){
         this.count = socket.emit('getPolicyCount');
-        console.log(this.count);
       },
       getLiberalCount() {
         return require('../assets/liberal-board/liberalboard' + this.liberal + '.png')
